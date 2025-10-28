@@ -1,0 +1,8 @@
+{
+  "name": "uro-care",
+  "compatibility_date": "2025-10-28",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  }
+}
