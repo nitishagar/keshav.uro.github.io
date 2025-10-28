@@ -1,0 +1,78 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables - Photo-Inspired Color Palette */
+:root {
+    --primary-color: #1e3a5f;        /* Navy blue from suit - for text and headers */
+    --accent-burgundy: #8b2e3e;      /* Burgundy from tie - primary CTA color */
+    --accent-bronze: #a67c52;        /* Bronze from background - subtle accents */
+    --text-dark: #2d3748;            /* Dark gray for body text */
+    --text-light: #6b7280;           /* Light gray for secondary text */
+    --background-white: #ffffff;     /* Pure white - main background */
+    --background-light: #fafafa;     /* Very light gray - subtle sections */
+    --border-light: #e5e5e5;         /* Light border for cards */
+    --gold-accent: #d4af37;          /* Gold for medals */
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-dark);
+    line-height: 1.6;
+    background: var(--background-white);
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Background utilities */
+.bg-light {
+    background: var(--background-light);
+}
+
+/* Section padding */
+.section-padding {
+    padding: 80px 20px;
+}
+
+/* Section titles */
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.section-intro {
+    text-align: center;
+    font-size: 1.125rem;
+    color: var(--text-light);
+    margin-bottom: 3rem;
+}
+
+/* Smooth transitions */
+a {
+    transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
