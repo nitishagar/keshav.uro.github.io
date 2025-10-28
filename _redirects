@@ -1,5 +1,2 @@
-# Ensure .html extension redirects to clean URLs
+# Redirect index.html to clean root URL
 /index.html / 301
-
-# Handle trailing slashes consistently
-/* /:splat 301
