@@ -878,3 +878,601 @@ a {
         height: 28px;
     }
 }
+
+/* ===================================
+   About Section with Image Layout
+   =================================== */
+.about-with-image {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-text {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+}
+
+.about-text .lead {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.about-text p {
+    margin-bottom: 1.5rem;
+}
+
+.about-image {
+    text-align: center;
+}
+
+.feature-image {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.feature-image:hover {
+    transform: scale(1.02);
+}
+
+.image-caption {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.key-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-light);
+}
+
+.highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.highlight-icon {
+    font-size: 2.5rem;
+}
+
+.highlight-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.highlight-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.highlight-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+}
+
+/* ===================================
+   Why Choose Section
+   =================================== */
+.why-choose-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.why-choose-card {
+    background: var(--background-white);
+    padding: 2.5rem;
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.why-choose-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-burgundy);
+}
+
+.why-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.why-choose-card h3 {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.why-choose-card p {
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+/* ===================================
+   Facility Section
+   =================================== */
+.facility-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.facility-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+.facility-text .lead {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.facility-text p {
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+}
+
+.facility-features {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-light);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.feature-check {
+    color: var(--accent-burgundy);
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* ===================================
+   Patient Care Philosophy Section
+   =================================== */
+.care-content {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.care-text {
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+.care-text .lead {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.care-text p {
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+}
+
+.care-principles {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.principle-item {
+    padding: 1.5rem;
+    background: var(--background-light);
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-burgundy);
+}
+
+.principle-item h4 {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.principle-item p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* ===================================
+   Responsive Adjustments for New Sections
+   =================================== */
+@media (max-width: 968px) {
+    .about-with-image {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .key-highlights {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .why-choose-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .facility-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .facility-image {
+        order: -1;
+    }
+
+    .care-content {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .care-image {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .why-choose-card {
+        padding: 2rem;
+    }
+
+    .key-highlights {
+        gap: 1rem;
+    }
+
+    .highlight-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ===================================
+   Credentials/Experience Page Header
+   =================================== */
+.credentials-header {
+    padding: 120px 20px 60px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-burgundy) 100%);
+    color: var(--background-white);
+    text-align: center;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+/* ===================================
+   Enhanced Qualification Cards
+   =================================== */
+.highlight-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 3px solid var(--accent-burgundy) !important;
+}
+
+.qualification-card .detail {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+
+/* ===================================
+   Certifications Section
+   =================================== */
+.certifications {
+    background: var(--background-light);
+}
+
+.cert-highlight {
+    display: grid;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.cert-badge {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    background: var(--background-white);
+    border-radius: 12px;
+    border-left: 5px solid var(--accent-burgundy);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.cert-badge:hover {
+    transform: translateX(10px);
+}
+
+.cert-icon {
+    font-size: 3.5rem;
+    min-width: 80px;
+    text-align: center;
+}
+
+.cert-details h3 {
+    font-size: 1.4rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.cert-details p {
+    color: var(--text-dark);
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+}
+
+.cert-institution {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* ===================================
+   Detailed Memberships Grid
+   =================================== */
+.memberships-section {
+    background: var(--background-white);
+}
+
+.memberships-grid-detailed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.membership-card {
+    background: var(--background-light);
+    padding: 2.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.membership-card:hover {
+    border-color: var(--accent-burgundy);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.membership-abbr-large {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-burgundy);
+    margin-bottom: 1rem;
+}
+
+.membership-card h3 {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.membership-card p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* ===================================
+   Academic Summary Section
+   =================================== */
+.academic-summary {
+    background: var(--background-light);
+}
+
+.summary-content .lead {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    margin-bottom: 3rem;
+    text-align: center;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.summary-highlights {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.summary-item {
+    padding: 2rem;
+    background: var(--background-white);
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+}
+
+.summary-item h3 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.summary-item p {
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+
+/* ===================================
+   Enhanced Publications
+   =================================== */
+.publication-item.featured {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff8e1 100%);
+    border-left: 5px solid var(--accent-burgundy);
+}
+
+.publication-desc {
+    margin-top: 1rem;
+    color: var(--text-dark);
+    line-height: 1.7;
+    font-style: italic;
+}
+
+.conference-list {
+    margin-top: 1rem;
+    padding-left: 1.5rem;
+}
+
+.conference-list li {
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.reviewer-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-left: 0;
+    list-style: none;
+}
+
+.reviewer-list li {
+    padding: 0.75rem;
+    background: var(--background-light);
+    border-radius: 6px;
+    color: var(--text-dark);
+}
+
+/* ===================================
+   Impact Summary Section
+   =================================== */
+.impact-summary {
+    background: var(--background-light);
+}
+
+.impact-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.impact-item {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: var(--background-white);
+    border-radius: 12px;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.impact-item:hover {
+    border-color: var(--accent-burgundy);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.impact-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent-burgundy);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.impact-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.impact-item p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+/* ===================================
+   Responsive - Credentials & Experience Pages
+   =================================== */
+@media (max-width: 968px) {
+    .memberships-grid-detailed {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .summary-highlights {
+        grid-template-columns: 1fr;
+    }
+
+    .impact-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cert-badge {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .credentials-header {
+        padding: 100px 20px 40px;
+    }
+
+    .memberships-grid-detailed {
+        grid-template-columns: 1fr;
+    }
+
+    .impact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviewer-list {
+        grid-template-columns: 1fr;
+    }
+}
