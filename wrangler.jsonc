@@ -2,6 +2,7 @@
   "name": "keshav-uro",
   "compatibility_date": "2025-10-28",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
   }
 }
