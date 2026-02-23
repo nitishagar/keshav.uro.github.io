@@ -341,20 +341,18 @@ a {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: linear-gradient(-45deg, #f0f4fa, #e8edf6, #f3edf0, #faf6f7, #eae4f0, #e8edf6);
-    background-size: 400% 400%;
-    animation: heroGradientShift 15s ease infinite;
+    background: linear-gradient(90deg, #edf2fa, #ede4f2, #f5e8ef, #edf2fa);
+    background-size: 100vw 100%;
+    background-repeat: repeat-x;
+    animation: heroGradientWave 15s linear infinite;
     padding: 100px 20px 60px;
     position: relative;
     overflow: hidden;
 }
 
-@keyframes heroGradientShift {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 100% 25%; }
-    50% { background-position: 100% 75%; }
-    75% { background-position: 0% 100%; }
-    100% { background-position: 0% 50%; }
+@keyframes heroGradientWave {
+    from { background-position: 0 0; }
+    to { background-position: -100vw 0; }
 }
 
 .hero::before {
@@ -1696,9 +1694,16 @@ a {
    =================================== */
 .credentials-header {
     padding: 120px 20px 60px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-burgundy) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-burgundy) 50%, var(--primary-color) 100%);
+    background-size: 200% 200%;
+    animation: headerGradientShift 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     color: var(--background-white);
     text-align: center;
+}
+
+@keyframes headerGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 .page-title {
