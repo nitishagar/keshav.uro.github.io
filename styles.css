@@ -248,8 +248,16 @@ a {
     .slide-in-right,
     .fade-in,
     .hero-image-animate,
+    .hero-content,
+    .hero-title,
+    .hero-subtitle,
+    .hero-credentials,
+    .hero-position,
+    .hero-specialties,
+    .hero-cta,
     .animate-card,
     .pulse-subtle,
+    .btn-whatsapp-hero,
     .image-zoom img {
         animation: none !important;
         transition: none !important;
@@ -333,8 +341,109 @@ a {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: var(--background-light);
+    background: linear-gradient(-45deg, #f0f4fa, #e8edf6, #f3edf0, #faf6f7, #eae4f0, #e8edf6);
+    background-size: 400% 400%;
+    animation: heroGradientShift 15s ease infinite;
     padding: 100px 20px 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes heroGradientShift {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 100% 25%; }
+    50% { background-position: 100% 75%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 50%; }
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(139, 46, 62, 0.07) 0%, rgba(139, 46, 62, 0.02) 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: heroOrbFloat1 12s ease-in-out infinite;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(30, 58, 95, 0.07) 0%, rgba(30, 58, 95, 0.02) 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: heroOrbFloat2 14s ease-in-out infinite;
+}
+
+@keyframes heroOrbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.97); }
+}
+
+@keyframes heroOrbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-30px, -20px) scale(1.03); }
+    66% { transform: translate(25px, 15px) scale(0.95); }
+}
+
+/* Hero entrance animations */
+.hero-content {
+    animation: heroContentSlideIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes heroContentSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.hero-title {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.hero-subtitle {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+}
+
+.hero-credentials {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+}
+
+.hero-position {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+}
+
+.hero-specialties {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.7s both;
+}
+
+.hero-cta {
+    animation: heroTitleFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.85s both;
+}
+
+@keyframes heroTitleFade {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-container {
@@ -442,6 +551,26 @@ a {
 .btn-secondary:hover {
     background: var(--primary-color);
     color: var(--background-white);
+}
+
+/* Hero WhatsApp CTA */
+.btn-whatsapp-hero {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    background: var(--accent-burgundy);
+    color: var(--background-white);
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+    animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+.btn-whatsapp-hero:hover {
+    background: #6d2331;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 46, 62, 0.4);
+    animation: none;
 }
 
 /* Responsive Hero - Mobile */
@@ -960,6 +1089,51 @@ a {
     box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
 }
 
+/* WhatsApp Booking Cards in Contact */
+.contact-intro-text {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}
+
+.whatsapp-booking-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.whatsapp-booking-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: var(--background-white);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.whatsapp-booking-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+}
+
+.booking-location-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.booking-location-address {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.contact-methods {
+    margin-top: 1rem;
+}
+
 /* Floating WhatsApp Button */
 .whatsapp-float {
     position: fixed;
@@ -973,13 +1147,24 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     z-index: 1000;
     transition: all 0.3s;
+    animation: whatsapp-pulse 2s infinite;
+}
+
+@keyframes whatsapp-pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
 }
 
 .whatsapp-float:hover {
     transform: scale(1.1);
+    animation: none;
     box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
 }
 
@@ -1181,50 +1366,230 @@ a {
 }
 
 /* ===================================
-   Facility Section
+   Locations Section
    =================================== */
-.facility-content {
+.locations-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+    margin-top: 3rem;
 }
 
-.facility-text {
-    font-size: 1.05rem;
-    line-height: 1.8;
+.location-card {
+    background: var(--background-white);
+    border-radius: 12px;
+    padding: 2.5rem;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.facility-text .lead {
-    font-size: 1.2rem;
-    font-weight: 500;
+.location-card:hover {
+    border-color: var(--accent-burgundy);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.location-badge {
+    display: inline-block;
+    padding: 0.375rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    width: fit-content;
+}
+
+.hospital-badge {
+    background: #eef2ff;
     color: var(--primary-color);
+}
+
+.clinic-badge {
+    background: #fef3e2;
+    color: #92400e;
+}
+
+.location-card h3 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.location-role {
+    font-size: 1rem;
+    color: var(--accent-burgundy);
+    font-weight: 500;
     margin-bottom: 1.5rem;
 }
 
-.facility-text p {
+.location-details {
     margin-bottom: 1.5rem;
+}
+
+.location-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.location-detail-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.location-detail-item p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.location-detail-item a {
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.location-detail-item a:hover {
+    color: var(--accent-burgundy);
+}
+
+.location-services {
+    margin-bottom: 1.5rem;
+}
+
+.location-services h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.location-services ul {
+    list-style: none;
+    padding: 0;
+}
+
+.location-services li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
     color: var(--text-dark);
 }
 
-.facility-features {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid var(--border-light);
-}
-
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-}
-
-.feature-check {
+.location-services li::before {
+    content: '\2713';
+    position: absolute;
+    left: 0;
     color: var(--accent-burgundy);
     font-weight: 700;
-    font-size: 1.5rem;
+}
+
+.location-map {
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+.location-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-whatsapp-sm {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #25D366;
+    color: var(--background-white);
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.btn-whatsapp-sm:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+.btn-directions {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 2px solid var(--border-light);
+    transition: all 0.3s;
+}
+
+.btn-directions:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--background-white);
+}
+
+/* Clinic Timing */
+.clinic-timing {
+    margin-bottom: 1.5rem;
+}
+
+.clinic-timing h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.timing-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.timing-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    background: var(--background-light);
+}
+
+.timing-row.morning {
+    border-left: 3px solid #f59e0b;
+}
+
+.timing-row.evening {
+    border-left: 3px solid var(--primary-color);
+}
+
+.timing-row.closed {
+    border-left: 3px solid var(--text-light);
+    opacity: 0.7;
+}
+
+.timing-days {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.timing-hours {
+    font-size: 0.9rem;
+    color: var(--text-light);
 }
 
 /* ===================================
@@ -1297,13 +1662,8 @@ a {
         grid-template-columns: 1fr;
     }
 
-    .facility-content {
+    .locations-grid {
         grid-template-columns: 1fr;
-        gap: 3rem;
-    }
-
-    .facility-image {
-        order: -1;
     }
 
     .care-content {
