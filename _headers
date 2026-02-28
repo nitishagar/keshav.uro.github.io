@@ -17,5 +17,11 @@
 /script.js
   Cache-Control: public, max-age=31536000, immutable
 
+/banner-manager.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/banners.json
+  Cache-Control: public, max-age=3600
+
 /*.JPG
   Cache-Control: public, max-age=31536000, immutable

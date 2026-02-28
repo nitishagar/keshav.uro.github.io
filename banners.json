@@ -1,0 +1,17 @@
+{
+  "banners": [
+    {
+      "id": "zoom-robotics-2026-02-28",
+      "type": "event",
+      "message": "Join Dr. Keshav Agarwal for a live Zoom session on Robotics Uro Surgeries today at 2:00 PM IST",
+      "ctaText": "Join Zoom Meeting",
+      "ctaUrl": "https://us06web.zoom.us/j/84365032649?pwd=Sj4vXaZ2D9sZXWVUGO5esmtVJ7EGdP.1",
+      "details": "Meeting ID: 843 6503 2649 | Passcode: 472690",
+      "startDate": "2026-02-28T00:00:00+05:30",
+      "endDate": "2026-02-28T15:00:00+05:30",
+      "dismissible": true,
+      "style": "info",
+      "pages": ["all"]
+    }
+  ]
+}
