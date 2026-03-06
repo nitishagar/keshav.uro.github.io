@@ -49,6 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// FAQ Accordion
+document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+        const item = button.parentElement;
+        const isOpen = item.classList.contains('active');
+        document.querySelectorAll('.faq-item.active').forEach(openItem => {
+            openItem.classList.remove('active');
+            openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+            item.classList.add('active');
+            button.setAttribute('aria-expanded', 'true');
+        }
+    });
+});
+
 // Active navigation highlighting
 window.addEventListener('scroll', () => {
     const sections = document.querySelectorAll('section[id]');

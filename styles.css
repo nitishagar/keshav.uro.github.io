@@ -2174,3 +2174,184 @@ a {
         transition: none;
     }
 }
+
+/* ===================================
+   FAQ Section
+   =================================== */
+.faq-list {
+    max-width: 800px;
+    margin: 2rem auto 0;
+}
+
+.faq-item {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background: var(--background-white);
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    text-align: left;
+    font-family: inherit;
+    line-height: 1.4;
+    gap: 1rem;
+}
+
+.faq-question:hover {
+    background: var(--background-light);
+}
+
+.faq-toggle {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--accent-burgundy);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.faq-item.active .faq-toggle {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding: 0 1.5rem 1.25rem;
+}
+
+.faq-answer p {
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+.faq-answer a {
+    color: var(--accent-burgundy);
+    text-decoration: none;
+}
+
+.faq-answer a:hover {
+    text-decoration: underline;
+}
+
+/* ===================================
+   Footer Navigation
+   =================================== */
+.footer-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.footer-nav a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.footer-nav a:hover {
+    color: #ffffff;
+}
+
+/* ===================================
+   Treatments Page
+   =================================== */
+.treatment-section {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.treatment-section:last-child {
+    border-bottom: none;
+}
+
+.treatment-section h2 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.treatment-section h3 {
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.symptoms-list, .treatment-options {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.symptoms-list li, .treatment-options li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.treatment-cta {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+}
+
+.last-reviewed {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border-light);
+    margin-top: 2rem;
+}
+
+/* ===================================
+   Privacy Page
+   =================================== */
+.privacy-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.privacy-content h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.privacy-content h3 {
+    color: var(--text-dark);
+    font-size: 1.15rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-content p,
+.privacy-content li {
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+}
+
+.privacy-content ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}

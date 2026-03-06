@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="100%" style="stop-color:#8b2e3e"/>
+    </linearGradient>
+  </defs>
+  <!-- Kidney shape -->
+  <path d="M32 6 C20 6, 10 14, 10 26 C10 34, 14 38, 18 40 C14 44, 12 50, 16 56 C20 62, 30 60, 32 52 C34 60, 44 62, 48 56 C52 50, 50 44, 46 40 C50 38, 54 34, 54 26 C54 14, 44 6, 32 6Z" fill="url(#g)"/>
+  <!-- Kidney hilum detail -->
+  <path d="M32 22 C28 26, 26 34, 30 40 C32 43, 34 43, 34 40 C38 34, 36 26, 32 22Z" fill="rgba(255,255,255,0.3)"/>
+</svg>
