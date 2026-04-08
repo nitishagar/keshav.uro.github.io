@@ -20,6 +20,9 @@
 /banner-manager.js
   Cache-Control: public, max-age=31536000, immutable
 
+/animations.js
+  Cache-Control: public, max-age=31536000, immutable
+
 /banners.json
   Cache-Control: public, max-age=3600
 
