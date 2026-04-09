@@ -143,6 +143,8 @@
                 "@type": "MedicalCondition",
                 "name": "Kidney Stones",
                 "alternateName": ["Renal Calculi", "Nephrolithiasis"],
+                "url": "https://uro-care.com/treatments.html#kidney-stones",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "N20", "codingSystem": "ICD-10-CM" },
                 "description": "Kidney stones are one of the most common urological conditions in India. Treatment depends on stone size and location.",
                 "signOrSymptom": [
                     { "@type": "MedicalSymptom", "name": "Renal colic (severe flank pain)" },
@@ -162,6 +164,8 @@
                 "@type": "MedicalCondition",
                 "name": "Benign Prostatic Hyperplasia",
                 "alternateName": ["BPH", "Enlarged Prostate"],
+                "url": "https://uro-care.com/treatments.html#prostate",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "N40", "codingSystem": "ICD-10-CM" },
                 "description": "One of the most common urological issues affecting men over 50 in India, causing urinary symptoms.",
                 "signOrSymptom": [
                     { "@type": "MedicalSymptom", "name": "Frequent urination (nocturia)" },
@@ -180,6 +184,8 @@
                 "@type": "MedicalCondition",
                 "name": "End-Stage Renal Disease",
                 "alternateName": ["Kidney Failure", "ESRD"],
+                "url": "https://uro-care.com/treatments.html#kidney-transplant",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "N18.6", "codingSystem": "ICD-10-CM" },
                 "description": "Advanced kidney disease requiring transplantation for long-term survival and quality of life.",
                 "possibleTreatment": [
                     { "@type": "MedicalProcedure", "name": "Robot-Assisted Kidney Transplantation", "procedureType": "Surgical" },
@@ -191,6 +197,8 @@
                 "@type": "MedicalCondition",
                 "name": "Kidney Cancer",
                 "alternateName": ["Renal Cell Carcinoma"],
+                "url": "https://uro-care.com/treatments.html#urological-cancers",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "C64", "codingSystem": "ICD-10-CM" },
                 "description": "Often detected incidentally on imaging. Treatment depends on tumor size and stage.",
                 "possibleTreatment": [
                     { "@type": "MedicalProcedure", "name": "Robotic Partial Nephrectomy", "procedureType": "Surgical" },
@@ -201,6 +209,8 @@
             {
                 "@type": "MedicalCondition",
                 "name": "Bladder Cancer",
+                "url": "https://uro-care.com/treatments.html#urological-cancers",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "C67", "codingSystem": "ICD-10-CM" },
                 "description": "Typically presents with painless blood in urine. Diagnosed through cystoscopy and biopsy.",
                 "signOrSymptom": [
                     { "@type": "MedicalSymptom", "name": "Painless haematuria (blood in urine)" }
@@ -215,6 +225,8 @@
             {
                 "@type": "MedicalCondition",
                 "name": "Prostate Cancer",
+                "url": "https://uro-care.com/treatments.html#urological-cancers",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "C61", "codingSystem": "ICD-10-CM" },
                 "description": "The most common cancer in men over 65. Early detection via PSA and DRE significantly improves outcomes.",
                 "possibleTreatment": [
                     { "@type": "MedicalProcedure", "name": "Robotic Radical Prostatectomy", "procedureType": "Surgical" },
@@ -226,6 +238,8 @@
                 "@type": "MedicalCondition",
                 "name": "Adrenal Tumors",
                 "alternateName": ["Pheochromocytoma", "Paraganglioma", "Adrenal Incidentaloma"],
+                "url": "https://uro-care.com/treatments.html#adrenal-surgery",
+                "medicalCode": { "@type": "MedicalCode", "codeValue": "D35.0", "codingSystem": "ICD-10-CM" },
                 "description": "Rare tumors of the adrenal gland that may produce excess hormones, causing high blood pressure and other symptoms.",
                 "signOrSymptom": [
                     { "@type": "MedicalSymptom", "name": "Episodes of high blood pressure" },
@@ -243,9 +257,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026040801">
+    <link rel="stylesheet" href="styles.css?v=2026040901">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Navigation -->
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="container">
@@ -259,10 +274,11 @@
                 <li><a href="treatments.html" class="active">Treatments</a></li>
                 <li><a href="index.html#contact" class="cta-button">Contact</a></li>
             </ul>
-            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">☰</button>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
         </div>
     </nav>
 
+    <main id="main-content">
     <!-- Page Header -->
     <section class="credentials-header">
         <div class="container">
@@ -454,6 +470,8 @@
         </div>
     </section>
 
+    </main>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -473,8 +491,8 @@
             </div>
         </div>
     </footer>
-    <script src="banner-manager.js?v=2026040801"></script>
-    <script src="script.js?v=2026040801"></script>
-    <script src="animations.js?v=2026040801"></script>
+    <script src="banner-manager.js?v=2026040901"></script>
+    <script src="script.js?v=2026040901"></script>
+    <script src="animations.js?v=2026040901"></script>
 </body>
 </html>

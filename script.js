@@ -13,17 +13,29 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const mobileToggle = document.querySelector('.mobile-menu-toggle');
 const navMenu = document.querySelector('.nav-menu');
 
+function closeMenu() {
+    navMenu.classList.remove('active');
+    if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
+}
+
 if (mobileToggle) {
     mobileToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
+        const isOpen = navMenu.classList.toggle('active');
+        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // Escape key closes menu
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+            closeMenu();
+            mobileToggle.focus();
+        }
     });
 }
 
 // Close mobile menu when clicking a link
 document.querySelectorAll('.nav-menu a').forEach(link => {
-    link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-    });
+    link.addEventListener('click', closeMenu);
 });
 
 // Scroll animations with Intersection Observer
@@ -65,23 +77,26 @@ document.querySelectorAll('.faq-question').forEach(button => {
     });
 });
 
-// Active navigation highlighting
+// Active navigation highlighting — passive + rAF throttled
+let scrollTicking = false;
+const navSections = Array.from(document.querySelectorAll('section[id]'));
+const navLinks = Array.from(document.querySelectorAll('.nav-menu a'));
+
 window.addEventListener('scroll', () => {
-    const sections = document.querySelectorAll('section[id]');
-    const scrollPosition = window.scrollY + 100;
-
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        const sectionId = section.getAttribute('id');
-
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-            document.querySelectorAll('.nav-menu a').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${sectionId}`) {
-                    link.classList.add('active');
+    if (!scrollTicking) {
+        requestAnimationFrame(() => {
+            const scrollPosition = window.scrollY + 100;
+            navSections.forEach(section => {
+                if (scrollPosition >= section.offsetTop &&
+                    scrollPosition < section.offsetTop + section.offsetHeight) {
+                    const sectionId = section.getAttribute('id');
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+                    });
                 }
             });
-        }
-    });
-});
+            scrollTicking = false;
+        });
+        scrollTicking = true;
+    }
+}, { passive: true });

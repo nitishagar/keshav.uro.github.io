@@ -7,11 +7,36 @@
     --accent-burgundy: #8b2e3e;      /* Burgundy from tie - primary CTA color */
     --accent-bronze: #a67c52;        /* Bronze from background - subtle accents */
     --text-dark: #2d3748;            /* Dark gray for body text */
-    --text-light: #6b7280;           /* Light gray for secondary text */
+    --text-light: #596171;           /* Darkened for WCAG 4.5:1 contrast on #fafafa */
     --background-white: #ffffff;     /* Pure white - main background */
     --background-light: #fafafa;     /* Very light gray - subtle sections */
     --border-light: #e5e5e5;         /* Light border for cards */
     --gold-accent: #d4af37;          /* Gold for medals */
+}
+
+/* Accessibility: Skip navigation link */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    background: var(--primary-color);
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 0 4px 4px;
+    font-weight: 600;
+    text-decoration: none;
+    z-index: 10000;
+    transition: top 0.15s ease;
+}
+.skip-link:focus {
+    top: 0;
+}
+
+/* Accessibility: Visible focus indicator */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    border-radius: 2px;
 }
 
 /* Reset and Base Styles */
@@ -2140,10 +2165,9 @@ a {
 }
 
 .banner-dismiss:hover,
-.banner-dismiss:focus {
+.banner-dismiss:focus-visible {
     background: rgba(255, 255, 255, 0.3);
     color: #fff;
-    outline: none;
 }
 
 @media (max-width: 768px) {

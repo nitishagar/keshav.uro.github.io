@@ -65,7 +65,7 @@
         },
         "url": "https://uro-care.com/",
         "image": "https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg",
-        "medicalSpecialty": ["Urology", "Robotic Surgery", "Minimally Invasive Surgery", "Kidney Transplantation"],
+        "medicalSpecialty": ["https://schema.org/Urologic", "Robotic Surgery", "Minimally Invasive Surgery", "Kidney Transplantation"],
         "description": "AIIMS Gold Medalist Urologist specializing in Robotic Kidney Transplantation, Minimally Invasive Urology, Kidney Stone Treatment, and Urological Oncology",
         "telephone": "+919818442016",
         "email": "keshavagar@gmail.com",
@@ -214,7 +214,7 @@
         "email": "keshavagar@gmail.com",
         "priceRange": "$$",
         "isAcceptingNewPatients": true,
-        "medicalSpecialty": "Urology",
+        "medicalSpecialty": "https://schema.org/Urologic",
         "address": {
             "@type": "PostalAddress",
             "streetAddress": "II - A/19, Nehru Nagar",
@@ -348,9 +348,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026040801">
+    <link rel="stylesheet" href="styles.css?v=2026040901">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Navigation -->
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="container">
@@ -363,10 +364,11 @@
                 <li><a href="treatments.html">Treatments</a></li>
                 <li><a href="#contact" class="cta-button">Contact</a></li>
             </ul>
-            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">☰</button>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
         </div>
     </nav>
 
+    <main id="main-content">
     <!-- Hero Section -->
     <section id="hero" class="hero">
         <div class="container hero-container">
@@ -802,6 +804,8 @@
         </svg>
     </a>
 
+    </main>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -821,8 +825,8 @@
             </div>
         </div>
     </footer>
-    <script src="banner-manager.js?v=2026040801"></script>
-    <script src="script.js?v=2026040801"></script>
-    <script src="animations.js?v=2026040801"></script>
+    <script src="banner-manager.js?v=2026040901"></script>
+    <script src="script.js?v=2026040901"></script>
+    <script src="animations.js?v=2026040901"></script>
 </body>
 </html>
