@@ -2379,3 +2379,42 @@ a {
     padding-left: 1.5rem;
     margin-bottom: 1rem;
 }
+
+/* Breadcrumb navigation */
+.breadcrumb {
+    padding: 1rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+.breadcrumb .container {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.breadcrumb ol {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    padding: 0;
+    margin: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.breadcrumb li + li::before {
+    content: "›";
+    margin-right: 0.5rem;
+    color: var(--text-light);
+}
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+.breadcrumb [aria-current="page"] {
+    color: var(--text-dark);
+    font-weight: 500;
+}
