@@ -29,10 +29,10 @@
     <meta property="og:url" content="https://uro-care.com/">
     <meta property="og:title" content="Urologist in Ghaziabad & Noida | Dr. Keshav Agarwal">
     <meta property="og:description" content="Dr. Keshav Agarwal — AIIMS dual gold medalist urologist in Ghaziabad & Noida. Robotic surgery, kidney transplant, stones and prostate treatment.">
-    <meta property="og:image" content="https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg">
-    <meta property="og:image:width" content="2128">
-    <meta property="og:image:height" content="3190">
-    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image" content="https://uro-care.com/images/og-front-1200.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/webp">
     <meta property="og:locale" content="en_IN">
     <meta property="og:site_name" content="Dr. Keshav Agarwal - Urologist">
 
@@ -40,7 +40,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Urologist in Ghaziabad & Noida | Dr. Keshav Agarwal">
     <meta name="twitter:description" content="AIIMS dual gold medalist. Robotic surgery, kidney transplant, stones and prostate care. Ghaziabad & Noida.">
-    <meta name="twitter:image" content="https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg">
+    <meta name="twitter:image" content="https://uro-care.com/images/og-front-1200.webp">
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
@@ -332,6 +332,9 @@
     }
     </script>
 
+    <link rel="preload" as="image" href="images/hero-front-1024.webp" type="image/webp" fetchpriority="high"
+          imagesrcset="images/hero-front-640.webp 640w, images/hero-front-1024.webp 1024w, images/hero-front-1600.webp 1600w"
+          imagesizes="(max-width: 800px) 100vw, 600px">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -360,7 +363,11 @@
     <section id="hero" class="hero">
         <div class="container hero-container">
             <div class="hero-image-wrapper">
-                <img src="./images/Dr. Keshav Agarwal Front.jpg" alt="Dr. Keshav Agarwal - Consultant Urologist at Kailash Hospital & Uro-Clinic" class="hero-image" loading="eager" fetchpriority="high" width="2128" height="3190">
+                <picture>
+                    <source type="image/avif" srcset="images/hero-front-640.avif 640w, images/hero-front-1024.avif 1024w, images/hero-front-1600.avif 1600w" sizes="(max-width: 800px) 100vw, 600px">
+                    <source type="image/webp" srcset="images/hero-front-640.webp 640w, images/hero-front-1024.webp 1024w, images/hero-front-1600.webp 1600w" sizes="(max-width: 800px) 100vw, 600px">
+                    <img src="images/hero-front-1024.webp" alt="Dr. Keshav Agarwal - Consultant Urologist at Kailash Hospital & Uro-Clinic" class="hero-image" loading="eager" fetchpriority="high" decoding="async" width="2128" height="3190">
+                </picture>
             </div>
             <div class="hero-content">
                 <h1 class="hero-title">Dr. Keshav Agarwal — Urologist in Ghaziabad & Noida</h1>
@@ -421,9 +428,13 @@
                     </div>
                 </div>
                 <div class="about-image image-zoom">
-                    <img src="./images/desk-explaining-ipad.jpg"
-                         alt="Dr. Keshav Agarwal explaining urological conditions to patients using advanced digital technology"
-                         class="feature-image" loading="lazy" width="2853" height="2447">
+                    <picture>
+                        <source type="image/avif" srcset="images/desk-ipad-640.avif 640w, images/desk-ipad-1024.avif 1024w" sizes="(max-width: 800px) 100vw, 500px">
+                        <source type="image/webp" srcset="images/desk-ipad-640.webp 640w, images/desk-ipad-1024.webp 1024w" sizes="(max-width: 800px) 100vw, 500px">
+                        <img src="images/desk-ipad-1024.webp"
+                             alt="Dr. Keshav Agarwal explaining urological conditions to patients using advanced digital technology"
+                             class="feature-image" loading="lazy" decoding="async" width="2853" height="2447">
+                    </picture>
                     <p class="image-caption">Dr. Agarwal uses state-of-the-art digital tools to help patients understand their condition and treatment options</p>
                 </div>
             </div>
@@ -650,9 +661,13 @@
                     </div>
                 </div>
                 <div class="care-image image-zoom">
-                    <img src="./images/writing-prescription.jpg"
-                         alt="Dr. Keshav Agarwal providing personalized consultation and treatment planning"
-                         class="feature-image" loading="lazy" width="2859" height="2745">
+                    <picture>
+                        <source type="image/avif" srcset="images/prescription-640.avif 640w, images/prescription-1024.avif 1024w" sizes="(max-width: 800px) 100vw, 500px">
+                        <source type="image/webp" srcset="images/prescription-640.webp 640w, images/prescription-1024.webp 1024w" sizes="(max-width: 800px) 100vw, 500px">
+                        <img src="images/prescription-1024.webp"
+                             alt="Dr. Keshav Agarwal providing personalized consultation and treatment planning"
+                             class="feature-image" loading="lazy" decoding="async" width="2859" height="2745">
+                    </picture>
                     <p class="image-caption">Dr. Agarwal provides personalized treatment plans tailored to each patient's unique needs</p>
                 </div>
             </div>
