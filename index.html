@@ -44,11 +44,14 @@
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-    <!-- Structured Data for Medical Professional -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
+    "@context": "https://schema.org",
+    "@graph": [
+    {
         "@type": "Physician",
+        "@id": "https://uro-care.com/#physician",
         "name": "Dr. Keshav Agarwal",
         "honorificPrefix": "Dr.",
         "alumniOf": {
@@ -62,6 +65,15 @@
         "description": "AIIMS Gold Medalist Urologist specializing in Robotic Kidney Transplantation, Minimally Invasive Urology, Kidney Stone Treatment, and Urological Oncology",
         "telephone": "+919818442016",
         "email": "keshavagar@gmail.com",
+        "areaServed": ["Ghaziabad", "Noida", "Delhi NCR", "Indirapuram", "Vasundhara", "Nehru Nagar", "Sector 71 Noida"],
+        "contactPoint": [
+            {
+                "@type": "ContactPoint",
+                "contactType": "appointments",
+                "telephone": "+919818442016",
+                "availableLanguage": ["en", "hi"]
+            }
+        ],
         "knowsAbout": ["Robotic Surgery", "Kidney Transplantation", "Minimally Invasive Surgery", "Percutaneous Nephrolithotomy", "Laparoscopic Urology", "Urological Oncology", "Prostate Surgery", "Kidney Stone Treatment", "Adrenal Surgery"],
         "hasCredential": [
             {
@@ -127,33 +139,7 @@
                     "addressCountry": "IN"
                 }
             },
-            {
-                "@type": "MedicalClinic",
-                "name": "Uro-Clinic",
-                "address": {
-                    "@type": "PostalAddress",
-                    "streetAddress": "II - A/19, Nehru Nagar",
-                    "addressLocality": "Ghaziabad",
-                    "addressRegion": "Uttar Pradesh",
-                    "postalCode": "201001",
-                    "addressCountry": "IN"
-                },
-                "telephone": "+919818442016",
-                "openingHoursSpecification": [
-                    {
-                        "@type": "OpeningHoursSpecification",
-                        "dayOfWeek": ["Monday", "Wednesday", "Friday"],
-                        "opens": "09:30",
-                        "closes": "11:00"
-                    },
-                    {
-                        "@type": "OpeningHoursSpecification",
-                        "dayOfWeek": ["Tuesday", "Thursday", "Saturday"],
-                        "opens": "18:00",
-                        "closes": "20:00"
-                    }
-                ]
-            }
+            { "@id": "https://uro-care.com/#clinic" }
         ],
         "memberOf": [
             {
@@ -191,14 +177,10 @@
         "sameAs": [
             "https://www.linkedin.com/in/keshav-agarwal-25ab6b80/"
         ]
-    }
-    </script>
-
-    <!-- Local Business Structured Data -->
-    <script type="application/ld+json">
+    },
     {
-        "@context": "https://schema.org",
-        "@type": "MedicalClinic",
+        "@type": ["MedicalClinic", "LocalBusiness"],
+        "@id": "https://uro-care.com/#clinic",
         "name": "Uro-Clinic - Dr. Keshav Agarwal",
         "url": "https://uro-care.com/",
         "image": "https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg",
@@ -277,13 +259,23 @@
                 }
             ]
         }
-    }
-    </script>
-
-    <!-- FAQ Structured Data -->
-    <script type="application/ld+json">
+    },
     {
-        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://uro-care.com/#website",
+        "url": "https://uro-care.com/",
+        "name": "Dr. Keshav Agarwal — Urologist",
+        "publisher": { "@id": "https://uro-care.com/#physician" },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://uro-care.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    },
+    {
         "@type": "FAQPage",
         "mainEntity": [
             {
@@ -335,6 +327,8 @@
                 }
             }
         ]
+    }
+    ]
     }
     </script>
 
