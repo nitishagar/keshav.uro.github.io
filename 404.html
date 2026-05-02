@@ -9,48 +9,52 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2026050201">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         .error-section {
-            min-height: 100vh;
+            min-height: 70vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             padding: 60px 20px;
         }
-        .error-content {
-            max-width: 600px;
-        }
+        .error-content { max-width: 640px; }
         .error-code {
-            font-size: 8rem;
+            font-size: 7rem;
             font-weight: 700;
             color: var(--primary-color);
             line-height: 1;
             margin-bottom: 1rem;
         }
-        .error-title {
-            font-size: 2rem;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-        }
-        .error-message {
-            font-size: 1.125rem;
-            color: var(--text-light);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        .error-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+        .error-title { font-size: 2rem; color: var(--text-dark); margin-bottom: 1rem; }
+        .error-message { font-size: 1.125rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.6; }
+        .error-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+        .popular-pages { text-align: left; max-width: 420px; margin: 0 auto; }
+        .popular-pages h2 { font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--primary-color); }
+        .popular-pages ul { list-style: none; padding: 0; margin: 0; }
+        .popular-pages li { padding: 0.5rem 0; border-bottom: 1px solid var(--border-light); }
+        .popular-pages a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+        .popular-pages a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <div class="nav-brand"><a href="/" style="color: inherit; text-decoration: none;">Dr. Keshav Agarwal</a></div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/credentials.html">Credentials</a></li>
+                <li><a href="/experience.html">Experience</a></li>
+                <li><a href="/treatments.html">Treatments</a></li>
+                <li><a href="/#contact" class="cta-button">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
+        </div>
+    </nav>
+
     <main id="main-content">
     <section class="error-section">
         <div class="error-content">
@@ -58,14 +62,38 @@
             <h1 class="error-title">Page Not Found</h1>
             <p class="error-message">
                 The page you're looking for doesn't exist or has been moved.
-                Please use the navigation below to find what you need.
+                Try one of the popular pages below, or message us on WhatsApp.
             </p>
             <div class="error-actions">
                 <a href="/" class="btn-primary">Go to Homepage</a>
-                <a href="/#contact" class="btn-secondary">Contact Dr. Agarwal</a>
+                <a href="https://wa.me/919818442016?text=Hello%20Dr.%20Keshav,%20I%20landed%20on%20a%20404%20page%20and%20need%20help." class="btn-whatsapp" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+            </div>
+            <div class="popular-pages">
+                <h2>Popular pages</h2>
+                <ul>
+                    <li><a href="/credentials.html">Professional Credentials</a></li>
+                    <li><a href="/experience.html">Professional Experience</a></li>
+                    <li><a href="/treatments.html">Urological Treatments</a></li>
+                    <li><a href="/privacy.html">Privacy Policy</a></li>
+                </ul>
             </div>
         </div>
     </section>
     </main>
+
+    <footer class="footer">
+        <div class="container">
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <a href="/">Home</a>
+                <a href="/credentials.html">Credentials</a>
+                <a href="/experience.html">Experience</a>
+                <a href="/treatments.html">Treatments</a>
+                <a href="/privacy.html">Privacy Policy</a>
+            </nav>
+            <div class="footer-content">
+                <p>&copy; 2026 Dr. Keshav Agarwal. M.Ch. Urology (AIIMS), MRCS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
