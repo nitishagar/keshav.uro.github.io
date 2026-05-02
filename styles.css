@@ -2418,3 +2418,28 @@ a {
     color: var(--text-dark);
     font-weight: 500;
 }
+
+/* Language toggle */
+.lang-toggle {
+  background: transparent;
+  border: 1.5px solid currentColor;
+  color: inherit;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  line-height: 1;
+}
+.lang-toggle:hover,
+.lang-toggle:focus-visible {
+  background: currentColor;
+  color: var(--primary, #1e3a5f);
+}
+.lang-toggle[aria-pressed="true"] {
+  background: var(--primary, #1e3a5f);
+  color: #fff;
+}
+html.lang-hi body { font-family: 'Inter', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif; }
