@@ -2418,3 +2418,56 @@ a {
     color: var(--text-dark);
     font-weight: 500;
 }
+
+/* Language toggle — burgundy pill matching site CTAs */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: var(--accent-burgundy);
+  border: 1.5px solid var(--accent-burgundy);
+  color: #fff;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  line-height: 1;
+  min-height: 2.25rem;
+  box-shadow: 0 1px 2px rgba(139, 46, 62, 0.25);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.lang-toggle::before {
+  content: "🌐";
+  font-size: 0.9em;
+  line-height: 1;
+}
+.lang-toggle:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(30, 58, 95, 0.3);
+}
+.lang-toggle:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+.lang-toggle[aria-pressed="true"] {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+html.lang-hi body {
+  font-family: 'Inter', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+}
+
+@media (max-width: 768px) {
+  .lang-toggle {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+}

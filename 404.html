@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026050201">
+    <link rel="stylesheet" href="styles.css?v=2026050203">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         .error-section {
@@ -40,16 +40,17 @@
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#main-content" class="skip-link" data-i18n-en="Skip to main content" data-i18n-hi="मुख्य सामग्री पर जाएं">Skip to main content</a>
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="container">
             <div class="nav-brand"><a href="/" style="color: inherit; text-decoration: none;">Dr. Keshav Agarwal</a></div>
             <ul class="nav-menu">
-                <li><a href="/">Home</a></li>
-                <li><a href="/credentials.html">Credentials</a></li>
-                <li><a href="/experience.html">Experience</a></li>
-                <li><a href="/treatments.html">Treatments</a></li>
-                <li><a href="/#contact" class="cta-button">Contact</a></li>
+                <li><a href="/" data-i18n-en="Home" data-i18n-hi="होम">Home</a></li>
+                <li><a href="/credentials.html" data-i18n-en="Credentials" data-i18n-hi="योग्यताएं">Credentials</a></li>
+                <li><a href="/experience.html" data-i18n-en="Experience" data-i18n-hi="अनुभव">Experience</a></li>
+                <li><a href="/treatments.html" data-i18n-en="Treatments" data-i18n-hi="उपचार">Treatments</a></li>
+                <li><a href="/#contact" class="cta-button" data-i18n-en="Contact" data-i18n-hi="संपर्क">Contact</a></li>
+                <li><button id="lang-toggle" class="lang-toggle" type="button" aria-pressed="false" aria-label="Switch language" data-i18n-en="हिंदी" data-i18n-hi="English">हिंदी</button></li>
             </ul>
             <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">☰</button>
         </div>
@@ -59,22 +60,22 @@
     <section class="error-section">
         <div class="error-content">
             <div class="error-code">404</div>
-            <h1 class="error-title">Page Not Found</h1>
-            <p class="error-message">
+            <h1 class="error-title" data-i18n-en="Page Not Found" data-i18n-hi="पृष्ठ नहीं मिला">Page Not Found</h1>
+            <p class="error-message" data-i18n-en="The page you're looking for doesn't exist or has been moved. Try one of the popular pages below, or message us on WhatsApp." data-i18n-hi="आप जो पृष्ठ खोज रहे हैं वह मौजूद नहीं है या स्थानांतरित कर दिया गया है। नीचे दिए गए लोकप्रिय पृष्ठों में से किसी एक को देखें, या हमें व्हाट्सएप पर संदेश भेजें।">
                 The page you're looking for doesn't exist or has been moved.
                 Try one of the popular pages below, or message us on WhatsApp.
             </p>
             <div class="error-actions">
-                <a href="/" class="btn-primary">Go to Homepage</a>
-                <a href="https://wa.me/919818442016?text=Hello%20Dr.%20Keshav,%20I%20landed%20on%20a%20404%20page%20and%20need%20help." class="btn-whatsapp" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+                <a href="/" class="btn-primary" data-i18n-en="Go to Homepage" data-i18n-hi="होम पर जाएं">Go to Homepage</a>
+                <a href="https://wa.me/919818442016?text=Hello%20Dr.%20Keshav,%20I%20landed%20on%20a%20404%20page%20and%20need%20help." class="btn-whatsapp" target="_blank" rel="noopener noreferrer" data-i18n-en="Message on WhatsApp" data-i18n-hi="व्हाट्सएप पर संदेश भेजें">Message on WhatsApp</a>
             </div>
             <div class="popular-pages">
-                <h2>Popular pages</h2>
+                <h2 data-i18n-en="Popular pages" data-i18n-hi="लोकप्रिय पृष्ठ">Popular pages</h2>
                 <ul>
-                    <li><a href="/credentials.html">Professional Credentials</a></li>
-                    <li><a href="/experience.html">Professional Experience</a></li>
-                    <li><a href="/treatments.html">Urological Treatments</a></li>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
+                    <li><a href="/credentials.html" data-i18n-en="Professional Credentials" data-i18n-hi="पेशेवर योग्यताएं">Professional Credentials</a></li>
+                    <li><a href="/experience.html" data-i18n-en="Professional Experience" data-i18n-hi="पेशेवर अनुभव">Professional Experience</a></li>
+                    <li><a href="/treatments.html" data-i18n-en="Urological Treatments" data-i18n-hi="यूरोलॉजी उपचार">Urological Treatments</a></li>
+                    <li><a href="/privacy.html" data-i18n-en="Privacy Policy" data-i18n-hi="गोपनीयता नीति">Privacy Policy</a></li>
                 </ul>
             </div>
         </div>
@@ -84,16 +85,17 @@
     <footer class="footer">
         <div class="container">
             <nav class="footer-nav" aria-label="Footer navigation">
-                <a href="/">Home</a>
-                <a href="/credentials.html">Credentials</a>
-                <a href="/experience.html">Experience</a>
-                <a href="/treatments.html">Treatments</a>
-                <a href="/privacy.html">Privacy Policy</a>
+                <a href="/" data-i18n-en="Home" data-i18n-hi="होम">Home</a>
+                <a href="/credentials.html" data-i18n-en="Credentials" data-i18n-hi="योग्यताएं">Credentials</a>
+                <a href="/experience.html" data-i18n-en="Experience" data-i18n-hi="अनुभव">Experience</a>
+                <a href="/treatments.html" data-i18n-en="Treatments" data-i18n-hi="उपचार">Treatments</a>
+                <a href="/privacy.html" data-i18n-en="Privacy Policy" data-i18n-hi="गोपनीयता नीति">Privacy Policy</a>
             </nav>
             <div class="footer-content">
                 <p>&copy; 2026 Dr. Keshav Agarwal. M.Ch. Urology (AIIMS), MRCS. All rights reserved.</p>
             </div>
         </div>
     </footer>
+    <script src="i18n.js?v=2026050202" defer></script>
 </body>
 </html>
