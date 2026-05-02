@@ -1,4 +1,19 @@
 User-agent: *
 Allow: /
+Disallow: /thoughts/
+Disallow: /.wrangler/
+Disallow: /scripts/
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
 
 Sitemap: https://uro-care.com/sitemap.xml

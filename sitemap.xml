@@ -1,32 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
     <url>
         <loc>https://uro-care.com/</loc>
-        <lastmod>2026-04-08</lastmod>
+        <lastmod>2026-05-02</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg</image:loc>
+        </image:image>
+        <image:image>
+            <image:loc>https://uro-care.com/images/desk-explaining-ipad.jpg</image:loc>
+        </image:image>
+        <image:image>
+            <image:loc>https://uro-care.com/images/writing-prescription.jpg</image:loc>
+        </image:image>
     </url>
     <url>
         <loc>https://uro-care.com/credentials.html</loc>
-        <lastmod>2026-04-08</lastmod>
+        <lastmod>2026-05-02</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+        <image:image>
+            <image:loc>https://uro-care.com/images/Dr.%20Keshav%20Agarwal%20Front.jpg</image:loc>
+        </image:image>
     </url>
     <url>
         <loc>https://uro-care.com/experience.html</loc>
-        <lastmod>2026-04-08</lastmod>
+        <lastmod>2026-05-02</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+        <image:image>
+            <image:loc>https://uro-care.com/images/at-yashoda-facility.jpg</image:loc>
+        </image:image>
     </url>
     <url>
         <loc>https://uro-care.com/treatments.html</loc>
-        <lastmod>2026-04-08</lastmod>
+        <lastmod>2026-05-02</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://uro-care.com/privacy.html</loc>
-        <lastmod>2026-04-08</lastmod>
+        <lastmod>2026-05-02</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
