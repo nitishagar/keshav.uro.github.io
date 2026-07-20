@@ -1,2 +1,5 @@
 # Redirect index.html to clean root URL
 /index.html / 301
+
+# Hindi directory index: serve /hi/ (the static index) for /hi/index.html too
+/hi/index.html /hi/ 301

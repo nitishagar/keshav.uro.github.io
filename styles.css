@@ -1,5 +1,15 @@
-/* Import Google Fonts */
-/* Google Fonts loaded via <link> in HTML head for faster rendering */
+/* Self-hosted Inter (variable font, latin subset).
+   Replaces the render-blocking Google Fonts <link>. Inter v20 ships as a
+   single variable woff2 (fvar wght axis 100-900); one @font-face with a
+   font-weight range serves all weights. font-display: swap keeps the
+   existing system-font fallback behavior during load. */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/inter-latin-var.woff2') format('woff2');
+}
 
 /* CSS Variables - Photo-Inspired Color Palette */
 :root {
@@ -2239,7 +2249,7 @@ a {
 
 .faq-toggle {
     font-size: 1.5rem;
-    font-weight: 300;
+    font-weight: 400;
     color: var(--accent-burgundy);
     transition: transform 0.3s ease;
     flex-shrink: 0;

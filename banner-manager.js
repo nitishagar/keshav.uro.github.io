@@ -12,7 +12,7 @@ class BannerManager {
 
     async init() {
         try {
-            const response = await fetch('banners.json');
+            const response = await fetch('/banners.json');
             if (!response.ok) return;
             const data = await response.json();
             if (!data.banners || !data.banners.length) return;
