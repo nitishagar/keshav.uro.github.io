@@ -204,12 +204,12 @@ def run(root: Path):
     sm = read(sitemap_path)
     legacy = len(re.findall(r'%20|\.jpg', sm))
     S.check(legacy == 0, "sitemap has no legacy-JPG or %20 refs", f"got {legacy}")
-    # Every <lastmod> in the sitemap must be 2026-07-20 (plan: "set lastmod to
-    # 2026-07-20 on all modified URLs"). The previous substring check would pass
-    # even if 6 of 7 entries were stale.
+    # Every <lastmod> in the sitemap must reflect this PR's public-URL signal
+    # alignment (2026-07-29). Content review dates on MedicalWebPage stay on
+    # their own timeline (still 2026-07-20 below).
     lastmods = re.findall(r'<lastmod>([^<]+)</lastmod>', sm)
-    S.check(bool(lastmods) and all(lm == "2026-07-20" for lm in lastmods),
-            "every sitemap <lastmod> is 2026-07-20",
+    S.check(bool(lastmods) and all(lm == "2026-07-29" for lm in lastmods),
+            "every sitemap <lastmod> is 2026-07-29",
             str(lastmods))
 
     # =================== Phase 2: social-card parity =================== #
@@ -377,7 +377,7 @@ def run(root: Path):
     # Canonical/og:url/sitemap-loc triple agreement (inv. 1) for new pages
     S.section("Phase 4 / URL-shape consistency (inv. 1)")
     for name, canon in (("hi_index", "https://uro-care.com/hi/"),
-                        ("hi_treatments", "https://uro-care.com/hi/treatments.html")):
+                        ("hi_treatments", "https://uro-care.com/hi/treatments")):
         t = texts[name]
         c = re.search(r'<link rel="canonical" href="([^"]+)"', t)
         o = re.search(r'<meta property="og:url" content="([^"]+)"', t)
@@ -389,8 +389,9 @@ def run(root: Path):
                 f"{name} appears in sitemap at {canon}")
     # Inv. 1 triple agreement (canonical == og:url == sitemap <loc>) on the 5
     # English indexable pages too — the new-page loop above covers /hi/ only.
-    # Without this, a canonical/og:url divergence on an English page (e.g. a
-    # stray clean-URL) would pass silently. 404 excluded (noindex, no canonical).
+    # Without this, a canonical/og:url divergence on an English page would pass
+    # silently. 404 excluded (noindex, no canonical). Public URLs are the
+    # Cloudflare Pretty URL 200 form (no .html); on-disk files remain *.html.
     for name in ("index", "treatments", "experience", "credentials", "privacy"):
         t = texts[name]
         c = re.search(r'<link rel="canonical" href="([^"]+)"', t)
@@ -434,9 +435,9 @@ def run(root: Path):
         ("x-default", "https://uro-care.com/"),
     }
     treat_expected = {
-        ("en-IN", "https://uro-care.com/treatments.html"),
-        ("hi-IN", "https://uro-care.com/hi/treatments.html"),
-        ("x-default", "https://uro-care.com/treatments.html"),
+        ("en-IN", "https://uro-care.com/treatments"),
+        ("hi-IN", "https://uro-care.com/hi/treatments"),
+        ("x-default", "https://uro-care.com/treatments"),
     }
     home_en = page_alt_set(root / "index.html")
     home_hi = page_alt_set(root / "hi" / "index.html")
@@ -445,7 +446,7 @@ def run(root: Path):
     home_page = home_en | home_hi
     treat_page = treat_en | treat_hi
     home_sm = sm_alt_set("https://uro-care.com/") | sm_alt_set("https://uro-care.com/hi/")
-    treat_sm = sm_alt_set("https://uro-care.com/treatments.html") | sm_alt_set("https://uro-care.com/hi/treatments.html")
+    treat_sm = sm_alt_set("https://uro-care.com/treatments") | sm_alt_set("https://uro-care.com/hi/treatments")
     S.check(home_page == home_expected, "home cluster page-tags == expected",
             str(home_page))
     S.check(home_sm == home_expected, "home cluster sitemap == expected",
@@ -468,8 +469,8 @@ def run(root: Path):
     S.check(sm_alt_set("https://uro-care.com/") == home_expected
             and sm_alt_set("https://uro-care.com/hi/") == home_expected,
             "home cluster: both sitemap <url>s emit the full reciprocal set")
-    S.check(sm_alt_set("https://uro-care.com/treatments.html") == treat_expected
-            and sm_alt_set("https://uro-care.com/hi/treatments.html") == treat_expected,
+    S.check(sm_alt_set("https://uro-care.com/treatments") == treat_expected
+            and sm_alt_set("https://uro-care.com/hi/treatments") == treat_expected,
             "treatments cluster: both sitemap <url>s emit the full reciprocal set")
 
     # banner-manager fetch fix + ?v= lockstep (inv. 5)
@@ -541,9 +542,9 @@ def run(root: Path):
         # home link -> /hi/
         S.check(re.search(r'href="/hi/"', t) is not None,
                 f"{name} has a nav link to /hi/")
-        # treatments link -> /hi/treatments.html
-        S.check(re.search(r'href="/hi/treatments\.html"', t) is not None,
-                f"{name} has a nav link to /hi/treatments.html")
+        # treatments link -> /hi/treatments (Pretty URL 200 form)
+        S.check(re.search(r'href="/hi/treatments(?:#|")', t) is not None,
+                f"{name} has a nav link to /hi/treatments")
 
     # noindex only on 404 (inv. 10) + each indexable page in sitemap once
     S.section("Phase 10 / index state (inv. 10)")
@@ -560,15 +561,43 @@ def run(root: Path):
     indexable = [
         "https://uro-care.com/",
         "https://uro-care.com/hi/",
-        "https://uro-care.com/credentials.html",
-        "https://uro-care.com/experience.html",
-        "https://uro-care.com/treatments.html",
-        "https://uro-care.com/hi/treatments.html",
-        "https://uro-care.com/privacy.html",
+        "https://uro-care.com/credentials",
+        "https://uro-care.com/experience",
+        "https://uro-care.com/treatments",
+        "https://uro-care.com/hi/treatments",
+        "https://uro-care.com/privacy",
     ]
     for url in indexable:
         count = sm.count(f"<loc>{url}</loc>")
         S.check(count == 1, f"{url} in sitemap exactly once", f"got {count}")
+
+    # Pretty URL signal alignment: public SEO surfaces must advertise the
+    # extensionless 200 URLs Cloudflare already serves. Listing *.html here
+    # would reintroduce the redirect-vs-canonical conflict (308 from .html →
+    # clean path while canonical/sitemap still pointed at .html).
+    S.section("Pretty URL public-signal alignment")
+    html_public = []
+    for name, t in texts.items():
+        if name == "404":
+            continue
+        for m in re.finditer(
+            r'(?:rel="canonical" href|property="og:url" content|hreflang="[^"]+" href)='
+            r'"(https://uro-care\.com/[^"]*\.html[^"]*)"',
+            t,
+        ):
+            html_public.append((name, m.group(1)))
+        for m in re.finditer(r'href="(/[^"]*\.html[^"]*)"', t):
+            html_public.append((name, m.group(1)))
+    for m in re.finditer(r'<loc>(https://uro-care\.com/[^<]*\.html[^<]*)</loc>', sm):
+        html_public.append(("sitemap", m.group(1)))
+    for m in re.finditer(
+        r'<xhtml:link rel="alternate" hreflang="[^"]+" href="(https://uro-care\.com/[^"]*\.html[^"]*)"',
+        sm,
+    ):
+        html_public.append(("sitemap-hreflang", m.group(1)))
+    S.check(not html_public,
+            "no public SEO/nav URL still uses .html (Pretty URL 200 form required)",
+            str(html_public[:8]))
 
     # =================== Phase 5: self-hosted fonts =================== #
     S.section("Phase 5: self-hosted fonts")
