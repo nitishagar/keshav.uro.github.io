@@ -86,6 +86,33 @@ To configure the custom domain `uro-care.com`:
 5. Cloudflare will automatically provision SSL/TLS certificates
 6. Repeat for both apex and www subdomain if you want both
 
+## SEO Owner-Action Runbook
+
+Items that cannot be completed in code because they need dashboard access or
+owner-generated tokens (audited 2026-08-26):
+
+### Google Search Console & Bing Webmaster Tools
+1. Verify `uro-care.com` in [Google Search Console](https://search.google.com/search-console) (DNS record method recommended).
+2. Add the generated token to **every** HTML page (including `hi/`) in `<head>`:
+   ```html
+   <meta name="google-site-verification" content="TOKEN_FROM_GSC">
+   ```
+3. Submit `https://uro-care.com/sitemap.xml` in GSC; repeat for Bing via [IndexNow/Bing Webmaster](https://www.bing.com/webmasters).
+
+### www → apex canonicalization
+Cloudflare Pages `_redirects` cannot match hostnames, so `www.uro-care.com`
+must be redirected at the zone level:
+- In Cloudflare dashboard: **Rules → Redirect Rules** → create a rule for host
+  `www.uro-care.com` → `https://uro-care.com/$uri`, status 301.
+- Self-referencing canonicals on every page mitigate duplication until this is done.
+
+### Roadmap: per-service landing pages
+Biggest remaining organic-growth lever. Split `treatments.html` into dedicated
+pages targeting distinct high-intent local queries, e.g.
+`/treatments/kidney-stone-treatment-ghaziabad`, `/treatments/robotic-kidney-transplant-noida`,
+`/treatments/prostate-surgery-holep-turp`. Each needs clinical content sign-off
+from Dr. Agarwal before publishing.
+
 ## Contact
 
 - **Email**: keshavagar@gmail.com
