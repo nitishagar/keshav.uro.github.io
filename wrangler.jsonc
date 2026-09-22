@@ -1,8 +1,11 @@
 {
   "name": "keshav-uro",
   "compatibility_date": "2025-10-28",
+  "main": "worker.js",
   "assets": {
     "directory": ".",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
   }
 }

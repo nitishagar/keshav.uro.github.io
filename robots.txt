@@ -17,3 +17,5 @@ User-agent: AdsBot-Google-Mobile
 Allow: /
 
 Sitemap: https://uro-care.com/sitemap.xml
+
+# Agents: see /llms.txt

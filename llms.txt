@@ -1,0 +1,13 @@
+# Dr. Keshav Agarwal — Urologist in Ghaziabad & Noida
+
+> Urology practice of Dr. Keshav Agarwal, AIIMS dual gold medalist: robotic surgery, kidney transplantation, kidney stone treatment, prostate care and urological oncology in Ghaziabad & Noida. Pages in English and Hindi. Every page below also serves a `text/markdown` variant via `Accept: text/markdown` content negotiation for AI agents.
+
+## Pages
+
+- [Home](https://uro-care.com/): practice overview, expertise, locations, FAQ and contact.
+- [Treatments](https://uro-care.com/treatments): kidney stones, prostate, robotic transplant, urological oncology.
+- [Credentials](https://uro-care.com/credentials): qualifications, gold medals, fellowship and memberships.
+- [Experience](https://uro-care.com/experience): positions, timeline, research and publications.
+- [Privacy](https://uro-care.com/privacy): privacy policy.
+- [Home (Hindi)](https://uro-care.com/hi/): मुख्य पृष्ठ — परिचय, विशेषज्ञता, स्थान और संपर्क।
+- [Treatments (Hindi)](https://uro-care.com/hi/treatments): उपचार — पथरी, प्रोस्टेट, प्रत्यारोपण।
