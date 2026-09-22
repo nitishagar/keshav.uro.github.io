@@ -658,7 +658,7 @@ def run(root: Path):
     # Edge wiring: Worker activation flags NESTED under assets (top-level keys
     # are silently ignored by wrangler), upload secrecy via .assetsignore, and
     # the stub-router decision table. These are file-content mirrors of the
-    # documented worker.js semantics; executed proof is the Node pipeline
+    # documented _worker.js semantics; executed proof is the Node pipeline
     # harness (tests/markdown_pipeline.mjs, run separately with `node`) and
     # the `wrangler dev` curl matrix in the plan's manual criteria.
     S.section("Markdown DIY / Phase 1 edge wiring")
@@ -699,26 +699,33 @@ def run(root: Path):
         if ai_path.exists() else []
     ai_norm = {l.rstrip("/").rstrip("/*") for l in ai_lines
                if l and not l.startswith("#")}
-    for secret in ("worker.js", "wrangler.jsonc", "thoughts",
+    for secret in ("worker.js", "_worker.js", "wrangler.jsonc", "thoughts",
                    ".wrangler", "scripts", "tests", ".assetsignore"):
         S.check(secret in ai_norm,
                 f".assetsignore covers {secret}",
                 str(sorted(ai_norm)))
 
-    # worker.js structural markers (Phase-1 stub shape per plan).
+    # Dual-platform entries: worker.js is the Workers shim (re-export),
+    # _worker.js holds the implementation AND is the Pages Functions entry
+    # (Pages never serves it; Workers bundles the shim at deploy time).
+    S.check((root / "_worker.js").exists(), "_worker.js exists (Pages entry)")
+    S.check('export { default } from "./_worker.js"' in read(root / "worker.js"),
+            "worker.js is a pure re-export shim (no logic to leak)")
+    # worker.js structural markers (implementation lives in _worker.js).
     S.section("Markdown DIY / Phase 1 router structure")
     worker = read(root / "worker.js")
-    S.check("function acceptsMarkdown" in worker,
-            "worker.js defines pure acceptsMarkdown()")
-    S.check("env.ASSETS.fetch" in worker,
-            "worker.js serves content via env.ASSETS.fetch")
-    S.check("X-Markdown-Stub" not in worker,
+    edge = read(root / "_worker.js")
+    S.check("function acceptsMarkdown" in edge,
+            "_worker.js defines pure acceptsMarkdown()")
+    S.check("env.ASSETS.fetch" in edge,
+            "_worker.js serves content via env.ASSETS.fetch")
+    S.check("X-Markdown-Stub" not in edge + worker,
             "Phase-1 stub marker removed (real converter in Phase 2)")
-    S.check(re.search(r"status\s*>=\s*300", worker) is not None,
-            "worker.js has 3xx passthrough guard (redirects never converted)")
+    S.check(re.search(r"status\s*>=\s*300", edge) is not None,
+            "_worker.js has 3xx passthrough guard (redirects never converted)")
 
     # Stub-router decision MIRROR (narrowly scoped to parser + arm order:
-    # 3xx first, then Accept, else passthrough). Mirrors worker.js
+    # 3xx first, then Accept, else passthrough). Mirrors _worker.js
     # acceptsMarkdown() semantics documented in the plan — INCLUDING its
     # prefix (non-anchored) q-param match: "q=0 garbage" refuses, like the
     # Worker, rather than falling back to q=1.
@@ -780,7 +787,7 @@ def run(root: Path):
     # =================== Markdown DIY / Phase 2 converter =================== #
     # Narrow MIRRORS of worker.js pure-function semantics on checked-in
     # fixtures. Mirrors assert documented input/output rules; the behavior
-    # they mirror is EXECUTED by tests/markdown_pipeline.mjs (real worker.js
+    # they mirror is EXECUTED by tests/markdown_pipeline.mjs (real _worker.js
     # fetch end-to-end, `node` required) — see REASONING.md. Each mirror is
     # labeled; drift fails loudly.
     S.section("Markdown DIY / Phase 2 fixtures present")
@@ -918,20 +925,20 @@ def run(root: Path):
     # pages and falls back with full bytes on a 2,097,153-byte synthetic).
     # Here: the cap constant is exactly 2 MiB (typo guard) and the worker
     # compares total bytes against it during buffering.
-    cap = re.search(r"MAX_CONVERT_BYTES\s*=\s*(\d+)", worker)
+    cap = re.search(r"MAX_CONVERT_BYTES\s*=\s*(\d+)", edge)
     S.check(cap is not None and int(cap.group(1)) == 2 * 1024 * 1024,
             "worker cap constant is exactly 2 MiB",
             cap.group(1) if cap else "not found")
-    S.check("> MAX_CONVERT_BYTES" in worker,
+    S.check("> MAX_CONVERT_BYTES" in edge,
             "worker gates total buffered bytes against the cap")
 
     S.section("Markdown DIY / Phase 2 token + header mirrors")
     sample = read(fx / "hindi_snippet.html")
     # Token formula guard: worker documents ceil(chars/4); executed proof is
     # the pipeline harness (identical x-markdown-tokens across two calls).
-    S.check("Math.ceil" in worker and "/ TOKEN_DIVISOR" in worker,
+    S.check("Math.ceil" in edge and "/ TOKEN_DIVISOR" in edge,
             "worker token estimate is ceil(chars/4)")
-    S.check("TOKEN_DIVISOR = 4" in worker,
+    S.check("TOKEN_DIVISOR = 4" in edge,
             "worker token divisor is 4 (documented heuristic)")
     S.check(len(re.findall(r'[\u0900-\u097F]', sample)) > 10,
             "Hindi fixture carries Devanagari through pipeline input")
@@ -951,24 +958,29 @@ def run(root: Path):
             "Vary origin dims preserved + Accept merged")
 
     S.section("Markdown DIY / Phase 2 worker structure")
-    S.check("HTMLRewriter" in worker, "worker.js strips via HTMLRewriter")
-    # Workers modules boot-crash on any named export (workerd: "Incorrect
+    S.check("HTMLRewriter" in edge, "_worker.js strips via HTMLRewriter")
+    # Edge modules boot-crash on named VALUE exports (workerd: "Incorrect
     # type for map entry ... not of type function or ExportedHandler").
-    # The single default export is the whole public surface.
-    S.check(re.search(r'^export\s*\{', worker, re.M) is None,
-            "worker.js has no named exports (workerd boot would crash)")
-    S.check(worker.count("export default") == 1,
-            "worker.js has exactly one default export")
+    # Allowed: one default export per entry, plus the shim's single
+    # `export { default } from` re-export line (not a value export).
+    S.check(re.search(r'^export\s*\{(?!\s*default\s*\})', edge, re.M) is None,
+            "_worker.js has no named exports (workerd boot would crash)")
+    S.check([l for l in worker.splitlines() if l.startswith("export")]
+            == ['export { default } from "./_worker.js";'],
+            "worker.js is exactly the re-export shim (nothing else)")
+    S.check(worker.count("export default") == 0
+            and edge.count("export default") == 1,
+            "shim re-exports; _worker.js has the single default export")
     for sel in ("button.mobile-menu-toggle", "a.skip-link", "span.faq-toggle"):
-        S.check(sel in worker, f"worker.js strips {sel}")
+        S.check(sel in edge, f"_worker.js strips {sel}")
     for dropped in ("content-encoding", "content-range", "transfer-encoding",
                     "etag", "last-modified"):
-        S.check(dropped in worker.lower(),
-                f"worker.js drops {dropped} on markdown responses")
-    S.check("text/markdown; charset=utf-8" in worker,
-            "worker.js sets markdown Content-Type")
-    S.check("TextEncoder" in worker,
-            "worker.js recomputes byte Content-Length (multi-byte Hindi)")
+        S.check(dropped in edge.lower(),
+                f"_worker.js drops {dropped} on markdown responses")
+    S.check("text/markdown; charset=utf-8" in edge,
+            "_worker.js sets markdown Content-Type")
+    S.check("TextEncoder" in edge,
+            "_worker.js recomputes byte Content-Length (multi-byte Hindi)")
     for marker in ("x-markdown-tokens", "x-original-tokens",
                    "content-signal", "ai-train=yes, search=yes, ai-input=yes",
                    "MAX_CONVERT_BYTES", "2097152", "upstream.status",
@@ -977,18 +989,18 @@ def run(root: Path):
                    "headless", "```json", "scopeMain", "htmlToMarkdown",
                    "buildMarkdown", "estimateTokens", "mergeVary",
                    "convertiblePath"):
-        S.check(marker in worker, f"worker.js contains {marker}")
+        S.check(marker in edge, f"_worker.js contains {marker}")
     # Link-safety allowlist is explicit (security review): only these schemes
     # linkify; javascript:/data:/vbscript: degrade to text.
     S.section("Markdown DIY / Phase 3 link-safety markers")
     for scheme in ('"http:"', '"https:"', '"tel:"', '"mailto:"'):
-        S.check(scheme in worker, f"worker.js allowlists {scheme}")
-    S.check("javascript:" in worker,
-            "worker.js names the javascript: danger scheme")
-    S.check("String(href).trim()" in worker,
-            "worker.js trims hrefs before scheme test (WHATWG padding)")
-    S.check("%28" in worker and "%29" in worker,
-            "worker.js percent-encodes parens in link destinations")
+        S.check(scheme in edge, f"_worker.js allowlists {scheme}")
+    S.check("javascript:" in edge,
+            "_worker.js names the javascript: danger scheme")
+    S.check("String(href).trim()" in edge,
+            "_worker.js trims hrefs before scheme test (WHATWG padding)")
+    S.check("%28" in edge and "%29" in edge,
+            "_worker.js percent-encodes parens in link destinations")
     # Fixture input-validity: body_sample must actually contain the chrome the
     # strip pass removes (else stripping asserts nothing); exotic entities
     # stay literal under the worker's scoped decoder. Execution proof for
@@ -1034,8 +1046,8 @@ def run(root: Path):
     S.check('frame-src https://maps.google.com' in headers,
             "CSP maps origin intact after Vary edit")
     # No v1 Link:/rel=alternate discovery header from the Worker.
-    S.check('rel="alternate"' not in worker and "rel='alternate'" not in worker,
-            "worker.js emits no rel=alternate discovery (v1: /llms.txt only)")
+    S.check('rel="alternate"' not in edge and "rel='alternate'" not in edge,
+            "_worker.js emits no rel=alternate discovery (v1: /llms.txt only)")
     # Secrecy regression: config/upload-exclusion files still in place and the
     # auto-exempt pair still present (404-on-fetch AND effects applied).
     S.check((root / "_headers").exists() and (root / "_redirects").exists(),

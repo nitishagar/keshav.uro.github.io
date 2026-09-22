@@ -3,6 +3,7 @@
 # so everything below is excluded from upload (gitignore format).
 .assetsignore
 worker.js
+_worker.js
 wrangler.jsonc
 thoughts/
 .wrangler/
