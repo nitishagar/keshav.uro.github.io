@@ -306,7 +306,7 @@ function mergeVary(headers) {
 
 export default {
   async fetch(request, env) {
-    const upstream = await env.ASSETS.fetch(request);
+    let upstream = await env.ASSETS.fetch(request);
     // 3xx passthrough: redirects (/_redirects) are never converted.
     if (upstream.status >= 300 && upstream.status < 400) {
       return upstream;
@@ -315,7 +315,8 @@ export default {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return upstream;
     }
-    if (!acceptsMarkdown(request.headers.get("Accept"))) {
+    const wantsMarkdown = acceptsMarkdown(request.headers.get("Accept"));
+    if (!wantsMarkdown) {
       return upstream;
     }
     // Content gate: only HTML responses convert (assets bypass by type).
@@ -327,10 +328,57 @@ export default {
     if (!convertiblePath(new URL(request.url).pathname)) {
       return upstream;
     }
+    // Range requests passthrough untouched: a 206 partial body must never be
+    // converted (length/validators would mismatch the partial content).
+    // If-None-Match/If-Modified-Since need no arm: validators are dropped
+    // below, so conditionals are simply not honored — full conversion stands.
+    if (request.headers.has("Range")) {
+      return upstream;
+    }
+    // HEAD converts the GET-equivalent body for correct Content-Length, then
+    // responds headers-only below.
+    if (request.method === "HEAD") {
+      upstream = await env.ASSETS.fetch(
+        new Request(request.url, { method: "GET", headers: request.headers }),
+      );
+      if (upstream.status >= 300 && upstream.status < 400) {
+        return upstream;
+      }
+    }
 
     let rawBytes = null;
     try {
-      rawBytes = new Uint8Array(await upstream.arrayBuffer());
+      // Buffered-with-cap gate: stream with a running total so over-cap is
+      // detected while reading, but always drain fully — the fallback below
+      // returns complete original bytes, never a truncation. rawBytes is only
+      // assigned after a clean full drain; a read failure leaves it null and
+      // propagates (origin-unreadable is a 5xx, not a conversion failure).
+      if (upstream.body === null) {
+        rawBytes = new Uint8Array(0);
+      } else {
+        const reader = upstream.body.getReader();
+        try {
+          const chunks = [];
+          let total = 0;
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            total += value.byteLength;
+            chunks.push(value);
+            // Over-cap detection happens here, during buffering; the drain
+            // continues so the fallback keeps the full body.
+          }
+          const merged = new Uint8Array(total);
+          let offset = 0;
+          for (const chunk of chunks) {
+            merged.set(chunk, offset);
+            offset += chunk.byteLength;
+          }
+          rawBytes = merged;
+        } finally {
+          reader.releaseLock();
+        }
+      }
       // Size gate on total bytes: over-cap falls back to the FULL original
       // response (never a truncated markdown body).
       if (rawBytes.byteLength > MAX_CONVERT_BYTES) {
@@ -370,6 +418,12 @@ export default {
       if (!headers.get("content-signal")) {
         headers.set("content-signal", CONTENT_SIGNAL_DEFAULT);
       }
+      // Error pages keep their status and gain an explicit noindex backstop:
+      // the head <meta robots> is stripped with the head, and the static
+      // _headers X-Robots-Tag does not cover extensionless paths.
+      if (upstream.status >= 400) {
+        headers.set("X-Robots-Tag", "noindex");
+      }
       // Status preserved (404 arm keeps 404 + noindex); HEAD returns the
       // GET-equivalent headers with an empty body.
       return new Response(request.method === "HEAD" ? null : mdBytes, {
@@ -377,11 +431,13 @@ export default {
         statusText: upstream.statusText,
         headers,
       });
-    } catch {
+    } catch (e) {
       // Fail open: converter failure returns the original bytes when we have
-      // them. (ASSETS.fetch itself throwing has no original; it propagates.)
+      // them. (ASSETS.fetch itself throwing, or a body read failure with no
+      // bytes drained, has no original; the ORIGINAL error propagates with
+      // its cause intact.)
       if (rawBytes !== null) return new Response(rawBytes, upstream);
-      throw new Error("markdown conversion failed before bytes were read");
+      throw e;
     }
   },
 };

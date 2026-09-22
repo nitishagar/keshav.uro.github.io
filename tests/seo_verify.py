@@ -718,7 +718,9 @@ def run(root: Path):
 
     # Stub-router decision MIRROR (narrowly scoped to parser + arm order:
     # 3xx first, then Accept, else passthrough). Mirrors worker.js
-    # acceptsMarkdown() semantics documented in the plan.
+    # acceptsMarkdown() semantics documented in the plan — INCLUDING its
+    # prefix (non-anchored) q-param match: "q=0 garbage" refuses, like the
+    # Worker, rather than falling back to q=1.
     S.section("Markdown DIY / Phase 1 Accept decision mirror")
     def mirror_accepts_markdown(value):
         if value is None:
@@ -729,7 +731,7 @@ def run(root: Path):
                 continue
             q = 1.0
             for p in parts[1:]:
-                m = re.match(r"\s*q\s*=\s*([0-9.]+)\s*$", p, re.I)
+                m = re.match(r"\s*q\s*=\s*([0-9.]+)", p, re.I)
                 if m:
                     try:
                         q = float(m.group(1))
@@ -748,6 +750,7 @@ def run(root: Path):
         ("text/markdown; q=0.0", False),
         ("text/markdown; q=0.5", True),
         ("text/markdown;charset=utf-8", True),
+        ("text/markdown; q=0 garbage", False),
         ("*/*", False),
         ("text/html, */*;q=0.8", False),
         ("text/*", False),
@@ -784,6 +787,32 @@ def run(root: Path):
         S.check((fx / f).exists(), f"fixture {f} exists")
 
     def mirror_meta(html):
+        # Scoped entity decoder matching worker.js decodeEntities (5 named
+        # refs + numeric only — NOT full html.unescape, so exotic entities
+        # like &copy; stay literal in both).
+        def mirror_decode(s):
+            def sub(m):
+                ref = m.group(1)
+                named = {"amp": "&", "lt": "<", "gt": ">", "quot": '"',
+                         "#39": "'", "#x27": "'", "#X27": "'"}
+                if ref in named:
+                    return named[ref]
+                if ref.startswith("#"):
+                    hexed = ref[1] in ("x", "X")
+                    try:
+                        code = int(ref[2:] if hexed else ref[1:],
+                                   16 if hexed else 10)
+                    except ValueError:
+                        return m.group(0)
+                    if 0 < code <= 0x10FFFF:
+                        try:
+                            return chr(code)
+                        except ValueError:
+                            pass
+                return m.group(0)
+            return re.sub(
+                r'&(amp|lt|gt|quot|#39|#x27|#X27|#[0-9]+|#[xX][0-9a-fA-F]+);',
+                sub, s)
         tags = []
         for m in re.finditer(r'<meta\b([^>]*)>', html, re.I):
             tag = m.group(0)
@@ -800,16 +829,18 @@ def run(root: Path):
         for name, prop, content in tags:
             if content is None or content.strip() == "":
                 continue
-            v = html_mod.unescape(content.strip())
-            if name == "title" and title is None:
+            v = mirror_decode(content.strip())
+            lname = name.lower() if name else None
+            lprop = prop.lower() if prop else None
+            if lname == "title" and title is None:
                 title = v
-            elif prop == "og:title" and title_og is None:
+            elif lprop == "og:title" and title_og is None:
                 title_og = v
-            elif name == "description" and desc is None:
+            elif lname == "description" and desc is None:
                 desc = v
-            elif prop == "og:description" and desc_og is None:
+            elif lprop == "og:description" and desc_og is None:
                 desc_og = v
-            elif prop == "og:image" and image is None:
+            elif lprop == "og:image" and image is None:
                 image = v
         return {"title": title or title_og, "description": desc or desc_og,
                 "image": image}
@@ -878,14 +909,25 @@ def run(root: Path):
                             ("image/webp", False)):
         S.check(("text/html" in ctype.lower()) is expected,
                 f"content-type gate {ctype!r} -> convert={expected}")
-    S.check(2097152 <= 2097152, "exactly-2MB boundary is convertible")
-    S.check(not (2097153 <= 2097152), "over-2MB falls back to HTML")
+    # Size-gate contract (executed proof: pipeline harness converts 58 KB
+    # pages and falls back with full bytes on a 2,097,153-byte synthetic).
+    # Here: the cap constant is exactly 2 MiB (typo guard) and the worker
+    # compares total bytes against it during buffering.
+    cap = re.search(r"MAX_CONVERT_BYTES\s*=\s*(\d+)", worker)
+    S.check(cap is not None and int(cap.group(1)) == 2 * 1024 * 1024,
+            "worker cap constant is exactly 2 MiB",
+            cap.group(1) if cap else "not found")
+    S.check("> MAX_CONVERT_BYTES" in worker,
+            "worker gates total buffered bytes against the cap")
 
-    import math as _math
     S.section("Markdown DIY / Phase 2 token + header mirrors")
     sample = read(fx / "hindi_snippet.html")
-    S.check(_math.ceil(len(sample) / 4) == _math.ceil(len(sample) / 4),
-            "token estimate deterministic per input bytes")
+    # Token formula guard: worker documents ceil(chars/4); executed proof is
+    # the pipeline harness (identical x-markdown-tokens across two calls).
+    S.check("Math.ceil" in worker and "/ TOKEN_DIVISOR" in worker,
+            "worker token estimate is ceil(chars/4)")
+    S.check("TOKEN_DIVISOR = 4" in worker,
+            "worker token divisor is 4 (documented heuristic)")
     S.check(len(re.findall(r'[\u0900-\u097F]', sample)) > 10,
             "Hindi fixture carries Devanagari through pipeline input")
 
@@ -925,10 +967,25 @@ def run(root: Path):
     for marker in ("x-markdown-tokens", "x-original-tokens",
                    "content-signal", "ai-train=yes, search=yes, ai-input=yes",
                    "MAX_CONVERT_BYTES", "2097152", "upstream.status",
-                   '"HEAD"', "```json", "scopeMain", "htmlToMarkdown",
+                   '"HEAD"', '"Range"', "noindex", "getReader",
+                   "releaseLock", "```json", "scopeMain", "htmlToMarkdown",
                    "buildMarkdown", "estimateTokens", "mergeVary",
                    "convertiblePath"):
         S.check(marker in worker, f"worker.js contains {marker}")
+    # Fixture input-validity: body_sample must actually contain the chrome the
+    # strip pass removes (else stripping asserts nothing); exotic entities
+    # stay literal under the worker's scoped decoder. Execution proof for
+    # both is the pipeline harness, not this file.
+    S.section("Markdown DIY / Phase 2 fixture input-validity")
+    body_fx = read(fx / "body_sample.html")
+    for chrome in ("<nav", "<footer", "<iframe", "faq-toggle", "breadcrumb",
+                   "<picture", "faq-question"):
+        S.check(chrome in body_fx,
+                f"body_sample fixture contains strippable {chrome}")
+    exotic = mirror_meta('<meta name="title" content="A &copy; B &nbsp; C">')
+    S.check(exotic["title"] == "A &copy; B &nbsp; C",
+            "exotic entities stay literal (scoped decoder)",
+            repr(exotic["title"]))
     S.check('noindex' in read(root / "404.html").lower(),
             "404.html stays noindex (preserved on markdown 404 arm)")
 
