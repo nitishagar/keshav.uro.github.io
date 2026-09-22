@@ -183,12 +183,14 @@ function stripTags(s) {
 
 /** Markdown link safety: only allowlisted schemes plus relative, empty and
  *  fragment-only hrefs become clickable links. javascript:/data:/vbscript:
- *  (any case) degrade to plain text so page HTML can never smuggle an
- *  executable link into downstream markdown->HTML renderers. */
+ *  (any case, including whitespace-padded variants that WHATWG URL parsing
+ *  would otherwise normalize back into a scheme) degrade to plain text, so
+ *  page HTML can never smuggle an executable link into downstream
+ *  markdown->HTML renderers. */
 function safeHref(href, baseUrl) {
-  const h = String(href);
-  if (h === "" || h.startsWith("#")) return h;
-  const scheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.exec(h);
+  const t = String(href).trim();
+  if (t === "" || t.startsWith("#")) return t;
+  const scheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.exec(t);
   if (scheme) {
     const s = scheme[0].toLowerCase();
     if (
@@ -197,15 +199,24 @@ function safeHref(href, baseUrl) {
       s === "tel:" ||
       s === "mailto:"
     ) {
-      return h;
+      return t;
     }
     return null;
   }
+  let resolved;
   try {
-    return new URL(h, baseUrl).href;
+    resolved = new URL(t, baseUrl).href;
   } catch {
-    return h;
+    return t;
   }
+  // WHATWG normalization strips tabs/newlines INSIDE the input as well, so a
+  // "relative" href can still normalize into a dangerous scheme — re-check
+  // the resolved protocol and only pass http(s) through.
+  const proto = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.exec(resolved);
+  if (proto && proto[0].toLowerCase() !== "http:" && proto[0].toLowerCase() !== "https:") {
+    return null;
+  }
+  return resolved;
 }
 
 /** Escape markdown link-text metacharacters so link text cannot break out
@@ -237,14 +248,27 @@ function htmlToMarkdown(html, baseUrl) {
     return alt !== null && alt.trim() !== "" ? " " + alt.trim() + " " : " ";
   });
   // Anchors -> [text](href) with absolute resolution; dangerous schemes
-  // degrade to plain text (see safeHref).
-  s = s.replace(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi, (m, attrs, inner) => {
-    const text = stripTags(inner).trim();
-    if (text === "") return "";
-    const url = safeHref(attr("<a " + attrs + ">", "href") || "", baseUrl);
-    if (url === null) return escapeMdText(text);
-    return "[" + escapeMdText(text) + "](" + url + ")";
-  });
+  // degrade to plain text (see safeHref). Destinations are percent-encoded
+  // for parens/whitespace so they cannot break out of (...) — the angle
+  // <url> form is unusable here because the generic tag-strip below would
+  // eat it as if it were an HTML tag.
+  s = s.replace(
+    /<a\b((?:"[^"]*"|'[^']*'|[^>"'])*)>([\s\S]*?)<\/a\s*>/gi,
+    (m, attrs, inner) => {
+      const text = stripTags(inner).trim();
+      if (text === "") return "";
+      const url = safeHref(attr("<a " + attrs + ">", "href") || "", baseUrl);
+      if (url === null) return escapeMdText(text);
+      const dest = url
+        .replace(/\(/g, "%28")
+        .replace(/\)/g, "%29")
+        .replace(/ /g, "%20")
+        .replace(/\t/g, "%09")
+        .replace(/\n/g, "%0A")
+        .replace(/\r/g, "%0D");
+      return "[" + escapeMdText(text) + "](" + dest + ")";
+    },
+  );
   // Lists.
   s = s.replace(/<(ul|ol)\b[^>]*>/gi, "\n\n");
   s = s.replace(/<\/(ul|ol)\s*>/gi, "\n");

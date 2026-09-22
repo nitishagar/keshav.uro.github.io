@@ -985,6 +985,10 @@ def run(root: Path):
         S.check(scheme in worker, f"worker.js allowlists {scheme}")
     S.check("javascript:" in worker,
             "worker.js names the javascript: danger scheme")
+    S.check("String(href).trim()" in worker,
+            "worker.js trims hrefs before scheme test (WHATWG padding)")
+    S.check("%28" in worker and "%29" in worker,
+            "worker.js percent-encodes parens in link destinations")
     # Fixture input-validity: body_sample must actually contain the chrome the
     # strip pass removes (else stripping asserts nothing); exotic entities
     # stay literal under the worker's scoped decoder. Execution proof for

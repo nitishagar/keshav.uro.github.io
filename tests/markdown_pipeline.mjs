@@ -72,7 +72,7 @@ function assetsFetch(input) {
     return new Response('<!DOCTYPE html><html><head><meta name="title" content="A &copy; B &nbsp; C &amp; D"></head><body><main><p>x</p></main></body></html>',
       { status: 200, headers: { "Content-Type": "text/html" } });
   if (path === "/badlinks.html")
-    return new Response('<!DOCTYPE html><html><head><meta name="title" content="Links"></head><body><main><p><a href="javascript:alert(1)">click</a> <a href="JaVaScRiPt:alert(2)">x</a> <a href="data:text/html,<h1>h</h1>">y</a> <a href="vbscript:z">w</a> <a href="/ok">a](http://evil)</a> <a href="https://uro-care.com/fine">good</a></p></main></body></html>',
+    return new Response('<!DOCTYPE html><html><head><meta name="title" content="Links"></head><body><main><p><a href="javascript:alert(1)">click</a> <a href="JaVaScRiPt:alert(2)">x</a> <a href="data:text/html,<h1>h</h1>">y</a> <a href="vbscript:z">w</a> <a href=" javascript:alert(3)">sp</a> <a href="java\tscript:alert(4)">tab</a> <a href="/ok">a](http://evil)</a> <a href="https://uro-care.com/fine">good</a> <a href="/x_(y)">paren</a></p></main></body></html>',
       { status: 200, headers: { "Content-Type": "text/html" } });
   if (path === "/vary.html")
     return new Response('<!DOCTYPE html><html><head><meta name="title" content="V"></head><body><main><p>v</p></main></body></html>',
@@ -211,8 +211,11 @@ for (const p of pages) {
   check(!bad.includes("JaVaScRiPt:"), "no mixed-case scheme emitted");
   check(!bad.includes("data:text/html") && !bad.includes("vbscript:"), "no data:/vbscript: emitted");
   check(bad.includes("click") && !bad.includes("](javascript"), "dangerous link degrades to text");
+  check(bad.includes("sp") && bad.includes("tab"), "whitespace/tab scheme variants degrade to text");
+  check(!/\(\s*"?\s*javascript/i.test(bad), "no normalized javascript: destination");
   check(bad.includes("[good](https://uro-care.com/fine)"), "allowlisted https link kept");
   check(bad.includes("a\\]\\(http://evil\\)"), "link-text brackets escaped");
+  check(bad.includes("[paren](https://uro-care.com/x_%28y%29)"), "paren destination percent-encoded");
   const ent = await (await get("/entity.html", "text/markdown")).text();
   check(ent.includes('title: "A &copy; B &nbsp; C & D"'), "exotic entities literal, &amp; decoded");
 }
