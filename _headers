@@ -12,6 +12,10 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-src https://maps.google.com; frame-ancestors 'self';
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=0, must-revalidate
+  # Defense-in-depth for the DIY Markdown-for-Agents same-URL variant: the
+  # Worker always sets Vary: Accept itself (the correctness guarantee, and the
+  # only Vary on extensionless pretty URLs, which match no block here).
+  Vary: Accept
 
 # Root path (/) is not matched by the /*.html glob — duplicate the trio so the
 # directory-index homepage response carries the same headers. Per Cloudflare
@@ -20,6 +24,7 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-src https://maps.google.com; frame-ancestors 'self';
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=0, must-revalidate
+  Vary: Accept
 
 # Hindi directory index (/hi/) — same situation as /: the /*.html glob does not
 # match the directory path. Duplicate the trio for the Hindi home response.
@@ -27,6 +32,7 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-src https://maps.google.com; frame-ancestors 'self';
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=0, must-revalidate
+  Vary: Accept
 
 # Cache control for assets
 /styles.css

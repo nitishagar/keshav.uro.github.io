@@ -113,6 +113,35 @@ pages targeting distinct high-intent local queries, e.g.
 `/treatments/prostate-surgery-holep-turp`. Each needs clinical content sign-off
 from Dr. Agarwal before publishing.
 
+## Markdown for Agents (DIY)
+
+Cloudflare's Pro **Markdown for Agents** (`Accept: text/markdown` content
+negotiation) is re-implemented here as a zero-dependency Worker so the site
+serves agents on the free plan:
+
+- Any HTML page requested with `Accept: text/markdown` returns `200` (or the
+  original status, e.g. `404`) with `Content-Type: text/markdown;
+  charset=utf-8`, `Vary: Accept`, a YAML frontmatter block
+  (`title`/`description`/`image` from meta tags, `meta name=` wins over
+  `og:`), body markdown (navigation, scripts, styles and map embeds
+  stripped; images degrade to `alt` text), a trailing fenced `json` block
+  with the page's JSON-LD, plus `x-markdown-tokens` / `x-original-tokens`
+  estimates (`~chars/4`, documented heuristic) and a default
+  `content-signal: ai-train=yes, search=yes, ai-input=yes`.
+- Requests without the header receive byte-identical HTML. Redirects,
+  non-HTML assets and oversized pages (>2 MB) are never converted; converter
+  failures fall back to the original response.
+- `worker.js` (edge router + converter), `.assetsignore` (keeps worker
+  source, `wrangler.jsonc`, `thoughts/`, `.wrangler/`, `scripts/`, `tests/`
+  out of the public asset upload), `llms.txt` (agent sitemap, also linked
+  from `robots.txt` and `sitemap.xml`).
+
+Dashboard owner-checks: confirm the zone is on the free plan (no
+`content_converter` toggle to conflict); optionally add a Cache Rule
+`Vary: Accept → normalize` to reduce CDN variant fan-out. Rollback: revert
+`main` / `assets.run_worker_first` in `wrangler.jsonc` — the site resumes
+pure static serving.
+
 ## Contact
 
 - **Email**: keshavagar@gmail.com

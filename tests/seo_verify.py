@@ -654,6 +654,405 @@ def run(root: Path):
             and "fonts.gstatic.com" not in headers,
             "CSP drops both Google Fonts origins")
 
+    # =================== Markdown for Agents (DIY) / Phase 1 =================== #
+    # Edge wiring: Worker activation flags NESTED under assets (top-level keys
+    # are silently ignored by wrangler), upload secrecy via .assetsignore, and
+    # the stub-router decision table. These are file-content mirrors of the
+    # documented _worker.js semantics; executed proof is the Node pipeline
+    # harness (tests/markdown_pipeline.mjs, run separately with `node`) and
+    # the `wrangler dev` curl matrix in the plan's manual criteria.
+    S.section("Markdown DIY / Phase 1 edge wiring")
+    try:
+        wrangler = json.loads(read(root / "wrangler.jsonc"))
+        w_ok = True
+    except (json.JSONDecodeError, ValueError) as e:
+        wrangler, w_ok = {}, False
+        w_err = str(e)
+    S.check(w_ok, "wrangler.jsonc parses as JSON",
+            "" if w_ok else w_err)
+    S.check(wrangler.get("main") == "worker.js",
+            'wrangler.jsonc main == "worker.js"',
+            repr(wrangler.get("main")))
+    assets = wrangler.get("assets", {}) if isinstance(wrangler, dict) else {}
+    S.check(assets.get("directory") == "." and assets.get("binding") == "ASSETS",
+            'wrangler assets keeps directory="." + binding="ASSETS"',
+            repr(assets))
+    S.check(assets.get("run_worker_first") is True,
+            "wrangler assets.run_worker_first is true (nested)",
+            repr(assets.get("run_worker_first")))
+    S.check(assets.get("not_found_handling") == "404-page",
+            'wrangler assets.not_found_handling == "404-page" (nested)',
+            repr(assets.get("not_found_handling")))
+    S.check("run_worker_first" not in wrangler or wrangler is assets,
+            "run_worker_first not duplicated at top level (silently ignored)",
+            "top-level duplication" if "run_worker_first" in wrangler else "")
+    S.check(wrangler.get("compatibility_date") == "2025-10-28",
+            "wrangler compatibility_date unchanged",
+            repr(wrangler.get("compatibility_date")))
+
+    # .assetsignore must cover every edge/tooling/test source path so none of
+    # them ships as a public static asset under assets.directory=".".
+    S.section("Markdown DIY / Phase 1 upload secrecy")
+    ai_path = root / ".assetsignore"
+    S.check(ai_path.exists(), ".assetsignore exists")
+    ai_lines = [l.strip() for l in read(ai_path).splitlines()] \
+        if ai_path.exists() else []
+    ai_norm = {l.rstrip("/").rstrip("/*") for l in ai_lines
+               if l and not l.startswith("#")}
+    for secret in ("worker.js", "_worker.js", "wrangler.jsonc", "thoughts",
+                   ".wrangler", "scripts", "tests", ".assetsignore"):
+        S.check(secret in ai_norm,
+                f".assetsignore covers {secret}",
+                str(sorted(ai_norm)))
+
+    # Dual-platform entries: worker.js is the Workers shim (re-export),
+    # _worker.js holds the implementation AND is the Pages Functions entry
+    # (Pages never serves it; Workers bundles the shim at deploy time).
+    S.check((root / "_worker.js").exists(), "_worker.js exists (Pages entry)")
+    S.check('export { default } from "./_worker.js"' in read(root / "worker.js"),
+            "worker.js is a pure re-export shim (no logic to leak)")
+    # worker.js structural markers (implementation lives in _worker.js).
+    S.section("Markdown DIY / Phase 1 router structure")
+    worker = read(root / "worker.js")
+    edge = read(root / "_worker.js")
+    S.check("function acceptsMarkdown" in edge,
+            "_worker.js defines pure acceptsMarkdown()")
+    S.check("env.ASSETS.fetch" in edge,
+            "_worker.js serves content via env.ASSETS.fetch")
+    S.check("X-Markdown-Stub" not in edge + worker,
+            "Phase-1 stub marker removed (real converter in Phase 2)")
+    S.check(re.search(r"status\s*>=\s*300", edge) is not None,
+            "_worker.js has 3xx passthrough guard (redirects never converted)")
+
+    # Stub-router decision MIRROR (narrowly scoped to parser + arm order:
+    # 3xx first, then Accept, else passthrough). Mirrors _worker.js
+    # acceptsMarkdown() semantics documented in the plan — INCLUDING its
+    # prefix (non-anchored) q-param match: "q=0 garbage" refuses, like the
+    # Worker, rather than falling back to q=1.
+    S.section("Markdown DIY / Phase 1 Accept decision mirror")
+    def mirror_accepts_markdown(value):
+        if value is None:
+            return False
+        for raw in str(value).split(","):
+            parts = raw.split(";")
+            if parts[0].strip().lower() != "text/markdown":
+                continue
+            q = 1.0
+            for p in parts[1:]:
+                m = re.match(r"\s*q\s*=\s*([0-9.]+)", p, re.I)
+                if m:
+                    try:
+                        q = float(m.group(1))
+                    except ValueError:
+                        q = 1.0
+            if q > 0:
+                return True
+        return False
+
+    accept_matrix = [
+        (None, False), ("", False), ("text/html", False),
+        ("text/markdown", True),
+        ("text/html, text/markdown", True),
+        ("TEXT/MARKDOWN", True),
+        ("text/markdown;q=0", False),
+        ("text/markdown; q=0.0", False),
+        ("text/markdown; q=0.5", True),
+        ("text/markdown;charset=utf-8", True),
+        ("text/markdown; q=0 garbage", False),
+        ("*/*", False),
+        ("text/html, */*;q=0.8", False),
+        ("text/*", False),
+    ]
+    for value, expected in accept_matrix:
+        S.check(mirror_accepts_markdown(value) is expected,
+                f"Accept {value!r} -> markdown={expected}",
+                f"got {mirror_accepts_markdown(value)!r}")
+
+    def mirror_stub_arm(accept, status):
+        if 300 <= status < 400:
+            return "passthrough-3xx"
+        if mirror_accepts_markdown(accept):
+            return "stub-markdown"
+        return "passthrough"
+
+    S.check(mirror_stub_arm("text/markdown", 200) == "stub-markdown",
+            "200 + markdown Accept routes to stub arm")
+    S.check(mirror_stub_arm("text/markdown", 301) == "passthrough-3xx",
+            "301 + markdown Accept still passthrough (redirects never converted)")
+    S.check(mirror_stub_arm("text/html", 200) == "passthrough",
+            "200 + plain Accept passthrough byte-identical")
+    S.check(mirror_stub_arm(None, 404) == "passthrough",
+            "404 without Accept passthrough (Phase-1 404 arm lands in Phase 2)")
+
+    # =================== Markdown DIY / Phase 2 converter =================== #
+    # Narrow MIRRORS of worker.js pure-function semantics on checked-in
+    # fixtures. Mirrors assert documented input/output rules; the behavior
+    # they mirror is EXECUTED by tests/markdown_pipeline.mjs (real _worker.js
+    # fetch end-to-end, `node` required) — see REASONING.md. Each mirror is
+    # labeled; drift fails loudly.
+    S.section("Markdown DIY / Phase 2 fixtures present")
+    fx = root / "tests" / "fixtures" / "markdown"
+    for f in ("meta_priority.html", "meta_og_only.html", "meta_none.html",
+              "jsonld_mixed.html", "body_sample.html", "hindi_snippet.html"):
+        S.check((fx / f).exists(), f"fixture {f} exists")
+
+    def mirror_meta(html):
+        # Scoped entity decoder matching worker.js decodeEntities (5 named
+        # refs + numeric only — NOT full html.unescape, so exotic entities
+        # like &copy; stay literal in both).
+        def mirror_decode(s):
+            def sub(m):
+                ref = m.group(1)
+                named = {"amp": "&", "lt": "<", "gt": ">", "quot": '"',
+                         "#39": "'", "#x27": "'", "#X27": "'"}
+                if ref in named:
+                    return named[ref]
+                if ref.startswith("#"):
+                    hexed = ref[1] in ("x", "X")
+                    try:
+                        code = int(ref[2:] if hexed else ref[1:],
+                                   16 if hexed else 10)
+                    except ValueError:
+                        return m.group(0)
+                    if 0 < code <= 0x10FFFF:
+                        try:
+                            return chr(code)
+                        except ValueError:
+                            pass
+                return m.group(0)
+            return re.sub(
+                r'&(amp|lt|gt|quot|#39|#x27|#X27|#[0-9]+|#[xX][0-9a-fA-F]+);',
+                sub, s)
+        tags = []
+        for m in re.finditer(r'<meta\b([^>]*)>', html, re.I):
+            tag = m.group(0)
+            def attr(name):
+                am = re.search(
+                    r'\b' + name + r'\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))',
+                    tag, re.I)
+                if not am:
+                    return None
+                return am.group(1) if am.group(1) is not None else (
+                    am.group(2) if am.group(2) is not None else am.group(3))
+            tags.append((attr("name"), attr("property"), attr("content")))
+        title = title_og = desc = desc_og = image = None
+        for name, prop, content in tags:
+            if content is None or content.strip() == "":
+                continue
+            v = mirror_decode(content.strip())
+            lname = name.lower() if name else None
+            lprop = prop.lower() if prop else None
+            if lname == "title" and title is None:
+                title = v
+            elif lprop == "og:title" and title_og is None:
+                title_og = v
+            elif lname == "description" and desc is None:
+                desc = v
+            elif lprop == "og:description" and desc_og is None:
+                desc_og = v
+            elif lprop == "og:image" and image is None:
+                image = v
+        return {"title": title or title_og, "description": desc or desc_og,
+                "image": image}
+
+    S.section("Markdown DIY / Phase 2 frontmatter mirror")
+    pri = mirror_meta(read(fx / "meta_priority.html"))
+    S.check(pri["title"] == "Ghaziabad & Noida | Name First",
+            "meta name=title wins over og:title, entity decoded",
+            repr(pri["title"]))
+    S.check(pri["description"] == "Plain description with 'quote' and \u2014 dash.",
+            "description entities decoded (decimal + hex)",
+            repr(pri["description"]))
+    S.check(pri["image"] == "https://uro-care.com/images/og-front-1200.webp",
+            "image from og:image", repr(pri["image"]))
+    ogf = mirror_meta(read(fx / "meta_og_only.html"))
+    S.check(ogf["title"] == "OG Fallback Title",
+            "og:title fallback when name= absent", repr(ogf["title"]))
+    S.check(ogf["image"] is None,
+            "absent image emits no field", repr(ogf["image"]))
+    non = mirror_meta(read(fx / "meta_none.html"))
+    S.check(non["title"] is None and non["description"] is None
+            and non["image"] is None,
+            "empty/absent meta omits whole frontmatter block",
+            repr(non))
+
+    S.section("Markdown DIY / Phase 2 JSON-LD mirror")
+    jl_html = read(fx / "jsonld_mixed.html")
+    raws = [m.group(2).strip() for m in re.finditer(
+        r'<script\b[^>]*\btype\s*=\s*("|' + r"'" +
+        r')application/ld\+json\1[^>]*>([\s\S]*?)</script\s*>',
+        jl_html, re.I)]
+    S.check(len(raws) == 4, "all 4 ld+json raws collected", f"got {len(raws)}")
+    kept = []
+    for raw in raws:
+        if "```" in raw:
+            continue  # fence-breaking block skipped like malformed ones
+        try:
+            json.loads(raw)
+            kept.append(raw)
+        except json.JSONDecodeError:
+            pass
+    S.check(len(kept) == 2, "malformed + fence-breaking blocks skipped",
+            f"kept {len(kept)}")
+    S.check('var x = 1;' not in "".join(kept),
+            "plain script content never enters JSON-LD fence")
+
+    S.section("Markdown DIY / Phase 2 gate mirrors")
+    def mirror_convertible_path(pathname):
+        seg = pathname.split("/")[-1]
+        dot = seg.rfind(".")
+        if dot == -1:
+            return True
+        return seg[dot + 1:].lower() in ("", "html", "htm")
+
+    for path, expected in (("/", True), ("/treatments", True),
+                           ("/hi/", True), ("/treatments.html", True),
+                           ("/styles.css", False), ("/photo.JPG", False),
+                           ("/banners.json", False), ("/sitemap.xml", False),
+                           ("/llms.txt", False),
+                           ("/fonts/inter-latin-var.woff2", False)):
+        S.check(mirror_convertible_path(path) is expected,
+                f"path gate {path} -> convert={expected}")
+    for ctype, expected in (("text/html", True),
+                            ("text/html; charset=utf-8", True),
+                            ("TEXT/HTML", True),
+                            ("text/css", False),
+                            ("application/json", False),
+                            ("image/webp", False)):
+        S.check(("text/html" in ctype.lower()) is expected,
+                f"content-type gate {ctype!r} -> convert={expected}")
+    # Size-gate contract (executed proof: pipeline harness converts 58 KB
+    # pages and falls back with full bytes on a 2,097,153-byte synthetic).
+    # Here: the cap constant is exactly 2 MiB (typo guard) and the worker
+    # compares total bytes against it during buffering.
+    cap = re.search(r"MAX_CONVERT_BYTES\s*=\s*(\d+)", edge)
+    S.check(cap is not None and int(cap.group(1)) == 2 * 1024 * 1024,
+            "worker cap constant is exactly 2 MiB",
+            cap.group(1) if cap else "not found")
+    S.check("> MAX_CONVERT_BYTES" in edge,
+            "worker gates total buffered bytes against the cap")
+
+    S.section("Markdown DIY / Phase 2 token + header mirrors")
+    sample = read(fx / "hindi_snippet.html")
+    # Token formula guard: worker documents ceil(chars/4); executed proof is
+    # the pipeline harness (identical x-markdown-tokens across two calls).
+    S.check("Math.ceil" in edge and "/ TOKEN_DIVISOR" in edge,
+            "worker token estimate is ceil(chars/4)")
+    S.check("TOKEN_DIVISOR = 4" in edge,
+            "worker token divisor is 4 (documented heuristic)")
+    S.check(len(re.findall(r'[\u0900-\u097F]', sample)) > 10,
+            "Hindi fixture carries Devanagari through pipeline input")
+
+    def mirror_vary_merge(existing):
+        vals = [v.strip() for v in existing.split(",")]
+        vals = [v for v in vals if v]
+        if not any(v.lower() == "accept" for v in vals):
+            vals.append("Accept")
+        return ", ".join(vals)
+
+    S.check(mirror_vary_merge("") == "Accept", "Vary empty -> Accept")
+    S.check(mirror_vary_merge("Accept") == "Accept", "Vary Accept deduped")
+    S.check(mirror_vary_merge("accept, gzip") == "accept, gzip",
+            "Vary existing Accept (any case) not duplicated")
+    S.check(mirror_vary_merge("text/html") == "text/html, Accept",
+            "Vary origin dims preserved + Accept merged")
+
+    S.section("Markdown DIY / Phase 2 worker structure")
+    S.check("HTMLRewriter" in edge, "_worker.js strips via HTMLRewriter")
+    # Edge modules boot-crash on named VALUE exports (workerd: "Incorrect
+    # type for map entry ... not of type function or ExportedHandler").
+    # Allowed: one default export per entry, plus the shim's single
+    # `export { default } from` re-export line (not a value export).
+    S.check(re.search(r'^export\s*\{(?!\s*default\s*\})', edge, re.M) is None,
+            "_worker.js has no named exports (workerd boot would crash)")
+    S.check([l for l in worker.splitlines() if l.startswith("export")]
+            == ['export { default } from "./_worker.js";'],
+            "worker.js is exactly the re-export shim (nothing else)")
+    S.check(worker.count("export default") == 0
+            and edge.count("export default") == 1,
+            "shim re-exports; _worker.js has the single default export")
+    for sel in ("button.mobile-menu-toggle", "a.skip-link", "span.faq-toggle"):
+        S.check(sel in edge, f"_worker.js strips {sel}")
+    for dropped in ("content-encoding", "content-range", "transfer-encoding",
+                    "etag", "last-modified"):
+        S.check(dropped in edge.lower(),
+                f"_worker.js drops {dropped} on markdown responses")
+    S.check("text/markdown; charset=utf-8" in edge,
+            "_worker.js sets markdown Content-Type")
+    S.check("TextEncoder" in edge,
+            "_worker.js recomputes byte Content-Length (multi-byte Hindi)")
+    for marker in ("x-markdown-tokens", "x-original-tokens",
+                   "content-signal", "ai-train=yes, search=yes, ai-input=yes",
+                   "MAX_CONVERT_BYTES", "2097152", "upstream.status",
+                   '"HEAD"', '"Range"', "noindex", "getReader",
+                   "releaseLock", "safeHref", "escapeMdText", "varyHtml",
+                   "headless", "```json", "scopeMain", "htmlToMarkdown",
+                   "buildMarkdown", "estimateTokens", "mergeVary",
+                   "convertiblePath"):
+        S.check(marker in edge, f"_worker.js contains {marker}")
+    # Link-safety allowlist is explicit (security review): only these schemes
+    # linkify; javascript:/data:/vbscript: degrade to text.
+    S.section("Markdown DIY / Phase 3 link-safety markers")
+    for scheme in ('"http:"', '"https:"', '"tel:"', '"mailto:"'):
+        S.check(scheme in edge, f"_worker.js allowlists {scheme}")
+    S.check("javascript:" in edge,
+            "_worker.js names the javascript: danger scheme")
+    S.check("String(href).trim()" in edge,
+            "_worker.js trims hrefs before scheme test (WHATWG padding)")
+    S.check("%28" in edge and "%29" in edge,
+            "_worker.js percent-encodes parens in link destinations")
+    # Fixture input-validity: body_sample must actually contain the chrome the
+    # strip pass removes (else stripping asserts nothing); exotic entities
+    # stay literal under the worker's scoped decoder. Execution proof for
+    # both is the pipeline harness, not this file.
+    S.section("Markdown DIY / Phase 2 fixture input-validity")
+    body_fx = read(fx / "body_sample.html")
+    for chrome in ("<nav", "<footer", "<iframe", "faq-toggle", "breadcrumb",
+                   "<picture", "faq-question"):
+        S.check(chrome in body_fx,
+                f"body_sample fixture contains strippable {chrome}")
+    exotic = mirror_meta('<meta name="title" content="A &copy; B &nbsp; C">')
+    S.check(exotic["title"] == "A &copy; B &nbsp; C",
+            "exotic entities stay literal (scoped decoder)",
+            repr(exotic["title"]))
+    S.check('noindex' in read(root / "404.html").lower(),
+            "404.html stays noindex (preserved on markdown 404 arm)")
+
+    # =================== Markdown DIY / Phase 3 close-out =================== #
+    S.section("Markdown DIY / Phase 3 discovery + hardening")
+    llms = read(root / "llms.txt")
+    S.check(llms.startswith("# "), "llms.txt starts with H1")
+    llms_urls = re.findall(r'\(https://uro-care\.com(/[^)]*)\)', llms)
+    S.check(set(llms_urls) == {"/", "/treatments", "/credentials",
+                               "/experience", "/privacy", "/hi/",
+                               "/hi/treatments"},
+            "llms.txt lists exactly the 7 sitemap URLs",
+            str(sorted(set(llms_urls))))
+    S.check("```" not in llms, "llms.txt is fence-free (v2 prose rule)")
+    S.check(re.search(r'^# Agents: see /llms\.txt\s*$', read(root / "robots.txt"),
+                      re.M) is not None,
+            "robots.txt links /llms.txt (additive comment, no directive change)")
+    sm_text = read(root / "sitemap.xml")
+    S.check("<!-- llms.txt: https://uro-care.com/llms.txt -->" in sm_text,
+            "sitemap carries additive llms.txt comment (URL set untouched)")
+    # _headers Vary on all three HTML blocks (Worker-set Vary is the
+    # guarantee; static Vary is defense-in-depth where globs reach).
+    for block in (r'^/\*\.html', r'^/$', r'^/hi/$'):
+        m = re.search(block + r'\s*\n((?:  .*\n)+)', headers, re.M)
+        S.check(m is not None and re.search(r'^  Vary: Accept\s*$',
+                                            m.group(1), re.M) is not None,
+                f"_headers {block} block sets Vary: Accept")
+    # HTML blocks still carry the CSP trio (Vary edit must not disturb them).
+    S.check('frame-src https://maps.google.com' in headers,
+            "CSP maps origin intact after Vary edit")
+    # No v1 Link:/rel=alternate discovery header from the Worker.
+    S.check('rel="alternate"' not in edge and "rel='alternate'" not in edge,
+            "_worker.js emits no rel=alternate discovery (v1: /llms.txt only)")
+    # Secrecy regression: config/upload-exclusion files still in place and the
+    # auto-exempt pair still present (404-on-fetch AND effects applied).
+    S.check((root / "_headers").exists() and (root / "_redirects").exists(),
+            "_headers/_redirects still present (parsed, not served)")
+
     return S.summary()
 
 

@@ -1,0 +1,19 @@
+# Edge/tooling/test sources must never ship as public static assets.
+# assets.directory="." uploads everything except _headers/_redirects,
+# so everything below is excluded from upload (gitignore format).
+.assetsignore
+worker.js
+_worker.js
+wrangler.jsonc
+thoughts/
+.wrangler/
+scripts/
+tests/
+# Repo-hygiene files: tracked docs and tooling state, not site content.
+.git/
+.gitignore
+README.md
+.nojekyll
+.DS_Store
+.claude/
+keshav-cv.md
