@@ -8,3 +8,11 @@ thoughts/
 .wrangler/
 scripts/
 tests/
+# Repo-hygiene files: tracked docs and tooling state, not site content.
+.git/
+.gitignore
+README.md
+.nojekyll
+.DS_Store
+.claude/
+keshav-cv.md

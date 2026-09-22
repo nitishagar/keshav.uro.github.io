@@ -181,14 +181,37 @@ function stripTags(s) {
   return String(s).replace(/<[^>]+>/g, "");
 }
 
-function resolveHref(href, baseUrl) {
+/** Markdown link safety: only allowlisted schemes plus relative, empty and
+ *  fragment-only hrefs become clickable links. javascript:/data:/vbscript:
+ *  (any case) degrade to plain text so page HTML can never smuggle an
+ *  executable link into downstream markdown->HTML renderers. */
+function safeHref(href, baseUrl) {
   const h = String(href);
-  if (h === "" || /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|#)/.test(h)) return h;
+  if (h === "" || h.startsWith("#")) return h;
+  const scheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.exec(h);
+  if (scheme) {
+    const s = scheme[0].toLowerCase();
+    if (
+      s === "http:" ||
+      s === "https:" ||
+      s === "tel:" ||
+      s === "mailto:"
+    ) {
+      return h;
+    }
+    return null;
+  }
   try {
     return new URL(h, baseUrl).href;
   } catch {
     return h;
   }
+}
+
+/** Escape markdown link-text metacharacters so link text cannot break out
+ *  of the [text](href) structure. */
+function escapeMdText(s) {
+  return String(s).replace(/([\\[\]()])/g, "\\$1");
 }
 
 /** Block/inline HTML serializer. Input: HTMLRewriter-stripped <main> HTML. */
@@ -213,11 +236,14 @@ function htmlToMarkdown(html, baseUrl) {
     const alt = attr(tag, "alt");
     return alt !== null && alt.trim() !== "" ? " " + alt.trim() + " " : " ";
   });
-  // Anchors -> [text](href) with absolute resolution.
+  // Anchors -> [text](href) with absolute resolution; dangerous schemes
+  // degrade to plain text (see safeHref).
   s = s.replace(/<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi, (m, attrs, inner) => {
     const text = stripTags(inner).trim();
     if (text === "") return "";
-    return "[" + text + "](" + resolveHref(attr("<a " + attrs + ">", "href") || "", baseUrl) + ")";
+    const url = safeHref(attr("<a " + attrs + ">", "href") || "", baseUrl);
+    if (url === null) return escapeMdText(text);
+    return "[" + escapeMdText(text) + "](" + url + ")";
   });
   // Lists.
   s = s.replace(/<(ul|ol)\b[^>]*>/gi, "\n\n");
@@ -270,11 +296,14 @@ function buildMarkdown(meta, body, jsonLdRaws) {
   parts.push(body);
   const valid = [];
   for (const raw of jsonLdRaws) {
+    // Skip-and-continue: malformed JSON never breaks the page — and neither
+    // may a fence-breaking triple-backtick inside an otherwise valid block.
+    if (raw.includes("```")) continue;
     try {
       JSON.parse(raw);
       valid.push(raw);
     } catch {
-      // Skip-and-continue: one malformed block never breaks the page.
+      continue;
     }
   }
   if (valid.length > 0) {
@@ -304,6 +333,30 @@ function mergeVary(headers) {
   headers.set("Vary", vals.join(", "));
 }
 
+/** Merge Vary: Accept into an HTML response (cache-variant correctness).
+ *  Non-HTML responses passthrough untouched — no benefit, only fan-out. */
+function varyHtml(response) {
+  const ct = response.headers.get("Content-Type") || "";
+  if (!ct.toLowerCase().includes("text/html")) return response;
+  const headers = new Headers(response.headers);
+  mergeVary(headers);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+/** HEAD semantics: headers of the given response, always with empty body. */
+function headless(request, response) {
+  if (request.method !== "HEAD") return response;
+  return new Response(null, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 export default {
   async fetch(request, env) {
     let upstream = await env.ASSETS.fetch(request);
@@ -311,13 +364,13 @@ export default {
     if (upstream.status >= 300 && upstream.status < 400) {
       return upstream;
     }
-    // Non-read methods passthrough untouched.
+    // Non-read methods passthrough untouched (Vary merged on HTML).
     if (request.method !== "GET" && request.method !== "HEAD") {
-      return upstream;
+      return varyHtml(upstream);
     }
     const wantsMarkdown = acceptsMarkdown(request.headers.get("Accept"));
     if (!wantsMarkdown) {
-      return upstream;
+      return varyHtml(upstream);
     }
     // Content gate: only HTML responses convert (assets bypass by type).
     const contentType = upstream.headers.get("Content-Type") || "";
@@ -333,7 +386,7 @@ export default {
     // If-None-Match/If-Modified-Since need no arm: validators are dropped
     // below, so conditionals are simply not honored — full conversion stands.
     if (request.headers.has("Range")) {
-      return upstream;
+      return varyHtml(upstream);
     }
     // HEAD converts the GET-equivalent body for correct Content-Length, then
     // responds headers-only below.
@@ -342,17 +395,18 @@ export default {
         new Request(request.url, { method: "GET", headers: request.headers }),
       );
       if (upstream.status >= 300 && upstream.status < 400) {
-        return upstream;
+        return headless(request, upstream);
       }
     }
 
     let rawBytes = null;
     try {
-      // Buffered-with-cap gate: stream with a running total so over-cap is
-      // detected while reading, but always drain fully — the fallback below
-      // returns complete original bytes, never a truncation. rawBytes is only
-      // assigned after a clean full drain; a read failure leaves it null and
-      // propagates (origin-unreadable is a 5xx, not a conversion failure).
+      // Buffered-with-cap gate: a running total detects over-cap DURING
+      // buffering. Past the cap we stop storing, cancel the stream, and fall
+      // back to a fresh full fetch — memory stays bounded (~cap + 1 chunk)
+      // and the fallback is never truncated. rawBytes is only assigned after
+      // a clean full drain; a read failure leaves it null and propagates
+      // (origin-unreadable is a 5xx, not a conversion failure).
       if (upstream.body === null) {
         rawBytes = new Uint8Array(0);
       } else {
@@ -360,13 +414,26 @@ export default {
         try {
           const chunks = [];
           let total = 0;
+          let overCap = false;
           for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
             total += value.byteLength;
+            if (total > MAX_CONVERT_BYTES) {
+              overCap = true;
+              break;
+            }
             chunks.push(value);
-            // Over-cap detection happens here, during buffering; the drain
-            // continues so the fallback keeps the full body.
+          }
+          if (overCap) {
+            try {
+              await reader.cancel();
+            } catch {
+              // Discard remainder; the fresh fetch below is authoritative.
+            }
+            // Static assets make a re-fetch equivalent bytes.
+            const fresh = await env.ASSETS.fetch(request);
+            return headless(request, varyHtml(fresh));
           }
           const merged = new Uint8Array(total);
           let offset = 0;
@@ -378,11 +445,6 @@ export default {
         } finally {
           reader.releaseLock();
         }
-      }
-      // Size gate on total bytes: over-cap falls back to the FULL original
-      // response (never a truncated markdown body).
-      if (rawBytes.byteLength > MAX_CONVERT_BYTES) {
-        return new Response(rawBytes, upstream);
       }
       const htmlText = new TextDecoder().decode(rawBytes);
       const meta = extractMeta(htmlText);
@@ -432,11 +494,13 @@ export default {
         headers,
       });
     } catch (e) {
-      // Fail open: converter failure returns the original bytes when we have
-      // them. (ASSETS.fetch itself throwing, or a body read failure with no
-      // bytes drained, has no original; the ORIGINAL error propagates with
-      // its cause intact.)
-      if (rawBytes !== null) return new Response(rawBytes, upstream);
+      // Fail open: converter failure returns the original bytes (with Vary
+      // merged) when we have them. (ASSETS.fetch itself throwing, or a body
+      // read failure with no bytes drained, has no original; the ORIGINAL
+      // error propagates with its cause intact.)
+      if (rawBytes !== null) {
+        return headless(request, varyHtml(new Response(rawBytes, upstream)));
+      }
       throw e;
     }
   },

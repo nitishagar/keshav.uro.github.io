@@ -658,8 +658,9 @@ def run(root: Path):
     # Edge wiring: Worker activation flags NESTED under assets (top-level keys
     # are silently ignored by wrangler), upload secrecy via .assetsignore, and
     # the stub-router decision table. These are file-content mirrors of the
-    # documented worker.js semantics; the authoritative Worker proof is the
-    # `wrangler dev` curl matrix in the plan's manual criteria.
+    # documented worker.js semantics; executed proof is the Node pipeline
+    # harness (tests/markdown_pipeline.mjs, run separately with `node`) and
+    # the `wrangler dev` curl matrix in the plan's manual criteria.
     S.section("Markdown DIY / Phase 1 edge wiring")
     try:
         wrangler = json.loads(read(root / "wrangler.jsonc"))
@@ -778,8 +779,10 @@ def run(root: Path):
 
     # =================== Markdown DIY / Phase 2 converter =================== #
     # Narrow MIRRORS of worker.js pure-function semantics on checked-in
-    # fixtures (the Worker JS runtime is proven by the dev curl matrix, not
-    # here). Each mirror is labeled; drift fails loudly.
+    # fixtures. Mirrors assert documented input/output rules; the behavior
+    # they mirror is EXECUTED by tests/markdown_pipeline.mjs (real worker.js
+    # fetch end-to-end, `node` required) — see REASONING.md. Each mirror is
+    # labeled; drift fails loudly.
     S.section("Markdown DIY / Phase 2 fixtures present")
     fx = root / "tests" / "fixtures" / "markdown"
     for f in ("meta_priority.html", "meta_og_only.html", "meta_none.html",
@@ -872,15 +875,17 @@ def run(root: Path):
         r'<script\b[^>]*\btype\s*=\s*("|' + r"'" +
         r')application/ld\+json\1[^>]*>([\s\S]*?)</script\s*>',
         jl_html, re.I)]
-    S.check(len(raws) == 3, "all 3 ld+json raws collected", f"got {len(raws)}")
+    S.check(len(raws) == 4, "all 4 ld+json raws collected", f"got {len(raws)}")
     kept = []
     for raw in raws:
+        if "```" in raw:
+            continue  # fence-breaking block skipped like malformed ones
         try:
             json.loads(raw)
             kept.append(raw)
         except json.JSONDecodeError:
             pass
-    S.check(len(kept) == 2, "malformed block skipped, valid kept",
+    S.check(len(kept) == 2, "malformed + fence-breaking blocks skipped",
             f"kept {len(kept)}")
     S.check('var x = 1;' not in "".join(kept),
             "plain script content never enters JSON-LD fence")
@@ -968,10 +973,18 @@ def run(root: Path):
                    "content-signal", "ai-train=yes, search=yes, ai-input=yes",
                    "MAX_CONVERT_BYTES", "2097152", "upstream.status",
                    '"HEAD"', '"Range"', "noindex", "getReader",
-                   "releaseLock", "```json", "scopeMain", "htmlToMarkdown",
+                   "releaseLock", "safeHref", "escapeMdText", "varyHtml",
+                   "headless", "```json", "scopeMain", "htmlToMarkdown",
                    "buildMarkdown", "estimateTokens", "mergeVary",
                    "convertiblePath"):
         S.check(marker in worker, f"worker.js contains {marker}")
+    # Link-safety allowlist is explicit (security review): only these schemes
+    # linkify; javascript:/data:/vbscript: degrade to text.
+    S.section("Markdown DIY / Phase 3 link-safety markers")
+    for scheme in ('"http:"', '"https:"', '"tel:"', '"mailto:"'):
+        S.check(scheme in worker, f"worker.js allowlists {scheme}")
+    S.check("javascript:" in worker,
+            "worker.js names the javascript: danger scheme")
     # Fixture input-validity: body_sample must actually contain the chrome the
     # strip pass removes (else stripping asserts nothing); exotic entities
     # stay literal under the worker's scoped decoder. Execution proof for
